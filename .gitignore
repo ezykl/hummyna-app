@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.expo/
+*.log
+.DS_Store
+.env
+.env.*
+*.keystore
+*.jks
+*.mobileprovision
+keys/*-private.jwk
