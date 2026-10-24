@@ -16,6 +16,15 @@ async function ecPair(): Promise<CryptoKeyPair> {
 }
 
 describe("webCryptoAdapter", () => {
+  it("imports JWK keys for unwrap and verify", async () => {
+    const rsa = await rsaPair();
+    const ec = await ecPair();
+    const wrapJwk = await crypto.subtle.exportKey("jwk", rsa.privateKey);
+    const signJwk = await crypto.subtle.exportKey("jwk", ec.publicKey);
+    expect(await webCryptoAdapter.importWrapPrivate(wrapJwk)).toBeTruthy();
+    expect(await webCryptoAdapter.importSignPublic(signJwk)).toBeTruthy();
+  });
+
   it("wraps and unwraps a 32-byte key", async () => {
     const pair = await rsaPair();
     const key = new Uint8Array(32).fill(7);
@@ -38,7 +47,8 @@ describe("webCryptoAdapter", () => {
     const ct = new Uint8Array(
       await crypto.subtle.encrypt({ name: "AES-GCM", iv: bs(nonce), additionalData: bs(aad) }, key, bs(pt)),
     );
-    const back = await webCryptoAdapter.decrypt(aad, nonce, ct, key);
+    const raw = new Uint8Array(await crypto.subtle.exportKey("raw", key));
+    const back = await webCryptoAdapter.decrypt(aad, nonce, ct, raw);
     expect(new TextDecoder().decode(back)).toBe("hello karaoke");
   });
 

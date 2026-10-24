@@ -1,0 +1,51 @@
+{
+  "label": "TEST-ONLY golden-vector keys committed under tests/golden for .hmp fixture generation and unit tests. NEVER use in production or for real libraries.",
+  "keyId": 7,
+  "wrapPublicJwk": {
+    "key_ops": [
+      "wrapKey"
+    ],
+    "ext": true,
+    "kty": "RSA",
+    "n": "2uNANPiTGXRs_5rLpzqQ_AbQAc9vdu_aWnkBBTiiCB5Yfya28NPUAfs3SgS5FYDiaMT7P6w8JOt4ffxYPGl_HXJm1oWt_oea86442ivS35YDu5OoiU6o0BY1xnEL3n8qC1rAfzy8nnZy5qwciq0wyuwBmfj0UegBI3dJhkD71rE6MSOAsfBM5iW4eY2fktgKbW4ChW38-61HtLs8dRzDlEXnZfn973Dta9VBLWDDZ0_vpQWI7aFkYubr4az2ZxO0SjjbYoI6BOQ7YygFFlUuIMIToYrlOylWS1kqchW3pUmf3eKQgk1Q-z2zb0LpQp0eTIKNo2NylYw7UgJMhURWuw",
+    "e": "AQAB",
+    "alg": "RSA-OAEP-256"
+  },
+  "wrapPrivateJwk": {
+    "key_ops": [
+      "unwrapKey"
+    ],
+    "ext": true,
+    "kty": "RSA",
+    "n": "2uNANPiTGXRs_5rLpzqQ_AbQAc9vdu_aWnkBBTiiCB5Yfya28NPUAfs3SgS5FYDiaMT7P6w8JOt4ffxYPGl_HXJm1oWt_oea86442ivS35YDu5OoiU6o0BY1xnEL3n8qC1rAfzy8nnZy5qwciq0wyuwBmfj0UegBI3dJhkD71rE6MSOAsfBM5iW4eY2fktgKbW4ChW38-61HtLs8dRzDlEXnZfn973Dta9VBLWDDZ0_vpQWI7aFkYubr4az2ZxO0SjjbYoI6BOQ7YygFFlUuIMIToYrlOylWS1kqchW3pUmf3eKQgk1Q-z2zb0LpQp0eTIKNo2NylYw7UgJMhURWuw",
+    "e": "AQAB",
+    "d": "Zh1KYOvuRBvKldwzUgrChLDw7UdGqufup_J3hWYMQVlW08rN4cAQ0fPOsVtOtTdxaIss42GIlXi8t5m32EcnJCewzjeDGpFMuo32u-Fh-SjVCPcz0wq9OoaCA9fNP7l3deCamUFOhWag5_g3QILXlnNPs_Mul99yWIdX56f9VQRwUJTzFaeE_NyS5ZsmikdSGzLD4snkDYX7oWIcriV_P4EsxuniH_cVRecM05le9yuPVDxndkmVQ6nVUN3u6YcgECwzIR96KUvVaBVWCpsDa3YfCBI9xHIDwo-BFdVwvhuAe49ZU5j8U3-LZBoQTnRyCiIV7HktcEan-SW2QzOPwQ",
+    "p": "7c3vBSHHh2QWl050B-yv4oLpvKZy--kgra4BTshlCjVf70qjWt7F_oDrKsXO7_Vg9KGMUCgLGczfrsPmJ4sxJnedltH5ITs0w5gsOgwJGY0QnUSBkcVfbdsR3wgW-IoUfLLfcKqUi6g_gCflxxMNbmx6f4m7_lZYALNGz4cbWFE",
+    "q": "66LHqxV85joe8Kcn5HgJ8UTJ2DQag3r-zSy1fXj8rGreTAnMsHrpnvIt-IHPMj223BF1eR80S8gF_cavhA7TpzuNl4xG41xdrGB4nmDiHCAhkwxTWIdKVVFjR9GzRC0BvPk10xp4P4R--LhWrsy8PqHRbaZQPYZTFxpW0JDTR0s",
+    "dp": "Haye8PMAJQL2Vrcxf3OnlwpjBGl427qBm2qlOyGCij2S1RdpPwOhjVqk_ddlNUhXau9lxPLaP8Py_anwZGrYHUa74YAeKGls8iNhEXVDBW827YkI6hnJCLpXho9J3oXMfKsNes-ubab3FZTk9WyJNohO2O9lCB3aKWw1n9vqK6E",
+    "dq": "MXzqel_071VdkiVJF46uZ-GOkr2-o8Z9JRIyu7thNcTsEwQr3RSzZBJw3TRGE8MqWGXCSkHnddL4jyffTNjgUssLHbz0VmPbuIw6SOkIE-gbpQp9pqYjUm_Zbgf4omThbJLaXw-8GXr2P75XVjbhgjXyChlX2NQRN1Tszrjb5qk",
+    "qi": "zzE1tL9V5DlwZwHev42uKUKmbAOiB5Yjfetb-hUv5AyPow_6ACYCmrYlv6hnaXEo7JYwK6O0h0O8uKxvnmWt8hKiRZv2T0bsSE1Ho3ZtGOaoFJp7LSOlAN03I_Y-WqUt5z_tBda9ZwEY0UbBpEaDci_4mxmXpBIfAszoZnc7ALo",
+    "alg": "RSA-OAEP-256"
+  },
+  "signPublicJwk": {
+    "key_ops": [
+      "verify"
+    ],
+    "ext": true,
+    "kty": "EC",
+    "x": "hJpTUjljxv_Fqy_1cMJVx11lfe6COkh-C_co0Ua7UiQ",
+    "y": "bu_SXZdqh5NyGKggfB95UcYIDNA9A3MSRBwj5mHvcM0",
+    "crv": "P-256"
+  },
+  "signPrivateJwk": {
+    "key_ops": [
+      "sign"
+    ],
+    "ext": true,
+    "kty": "EC",
+    "x": "hJpTUjljxv_Fqy_1cMJVx11lfe6COkh-C_co0Ua7UiQ",
+    "y": "bu_SXZdqh5NyGKggfB95UcYIDNA9A3MSRBwj5mHvcM0",
+    "crv": "P-256",
+    "d": "KyHqN037U3_hb7-gOY9S5OfAcscczNF4xldANVzbMNw"
+  }
+}

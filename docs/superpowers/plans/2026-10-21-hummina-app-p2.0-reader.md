@@ -15,7 +15,7 @@
 
 - **No runtime dependencies** in `packages/hmp`. WebCrypto + `CompressionStream('deflate-raw')` are used only by the *default* adapters; the reader core touches neither directly.
 - **Random access only** — the reader must never require the whole file in memory; it reads byte ranges via `ByteSource`.
-- **Exact format values** (from `docs/FORMAT.md`): magic `HMP1`/`HMPE`; HEADER 16 bytes; KEY BLOCK = `u32LE wrappedLen ‖ wrapped`; song block = `nonce12 ‖ ct ‖ tag16`; **AAD = `number u32LE ‖ offset u64LE ‖ length u32LE`**; INDEX = `u32LE count ‖ [number u32, titleLen u8+utf8, singerLen u8+utf8, offset u64, length u32, nonce12]*`; FOOTER 76 = `indexOffset u64LE ‖ sigP1363(64) ‖ "HMPE"`; AES-256-GCM; RSA-OAEP-SHA256 wrap; ECDSA-P256 P1363.
+- **Exact format values** (from `docs/FORMAT.md`): magic `HMP1`/`HMPE`; HEADER 16 bytes; KEY BLOCK = `u32LE wrappedLen ‖ wrapped`; song block = `nonce12 ‖ ct ‖ tag16`; **AAD = `number u32LE ‖ offset u64LE ‖ length u32LE`**; INDEX = `u32LE count ‖ [number u32, titleLen u32+utf8, singerLen u32+utf8, offset u64, length u32, nonce12]*`; FOOTER 76 = `indexOffset u64LE ‖ sigP1363(64) ‖ "HMPE"`; AES-256-GCM; RSA-OAEP-SHA256 wrap; ECDSA-P256 P1363.
 - **Source repo for the port:** `C:\Users\Janre\Documents\HumMyna` (private Studio). Copy the framework-agnostic modules verbatim, then refactor behind the seams.
 - **Do NOT copy the writer** (`writer.ts`) or any signing code; this package is reader-only. Tests use the committed golden `.hmp` fixture instead of a writer.
 - Every task: `npm run lint` (tsc) + `npm test` (vitest) green in the app repo; explicit `git add <paths>`; commit per task.
