@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript 5 · vitest 3 (Node env) · npm workspaces. No runtime deps (WebCrypto + `CompressionStream` are Node globals).
 
-**Spec:** `docs/superpowers/specs/2026-10-21-hummina-app-phase2-design.md` (§5)
+**Spec:** `docs/superpowers/specs/2026-10-21-hummyna-app-phase2-design.md` (§5)
 **Format:** `docs/FORMAT.md` (normative)
 
 ## Global Constraints
@@ -36,7 +36,7 @@
 
 ```json
 {
-  "name": "hummina-app",
+  "name": "hummyna-app",
   "private": true,
   "type": "module",
   "workspaces": ["packages/*"],

@@ -1,8 +1,8 @@
-# HumMyna Player (`hummina-app`) — Phase 2 Design
+# HumMyna Player (`hummyna-app`) — Phase 2 Design
 
 Status: approved (design), pending written-spec review
 Date: 2026-10-21
-Repo: `ezykl/hummina-app` (public / open source)
+Repo: `ezykl/hummyna-app` (public / open source)
 
 ## 1. Goal & context
 
@@ -33,7 +33,7 @@ parity; the Studio/packer (separate private repo).
 
 - **React Native + Expo (EAS)**, TypeScript. Reuses the Phase-1 TypeScript
   `.hmp` reader.
-- Single public repo `ezykl/hummina-app`, with the reader as a workspace package
+- Single public repo `ezykl/hummyna-app`, with the reader as a workspace package
   `packages/hmp` (publishable later).
 - **No functional dependency on a domain**; the app is offline and account-free.
 - Android first (EAS Build → Play internal testing), then iOS in the same
@@ -183,7 +183,7 @@ file-access module.
 
 - **Decided:** RN + Expo; Android-first; approach C (interface + WebView
   prototype → native Android engine); V1 = all audio except autotune; shared
-  library key bundled; separate public repo `ezykl/hummina-app`.
+  library key bundled; separate public repo `ezykl/hummyna-app`.
 - **Open:** the GM **SoundFont (`.sf2`)** — user to provide/create (license-clear).
 - **Open:** `ByteSource` ranged-read spike over `content://`.
 - **Later:** per-device keys; autotune/voice-FX; iOS audio engine; publish

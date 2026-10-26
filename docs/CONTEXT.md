@@ -4,14 +4,14 @@ Single-file map for a fresh session. Read this, then the spec and the current pl
 
 ## What this is
 The **cross-platform karaoke player** for `.hmp` libraries — **open source**
-(public repo `ezykl/hummina-app`). It carries the open half of the format (the
+(public repo `ezykl/hummyna-app`). It carries the open half of the format (the
 **reader**, `@hummina/hmp`). The writer/packer ("HumMyna Studio") lives in a
 separate private repo.
 
 - **Stack:** Expo SDK 58 · React Native 0.88 · React 19.3 · TypeScript ~6 ·
   expo-router · npm workspaces.
 - **Format (normative):** `docs/FORMAT.md`.
-- **Design spec:** `docs/superpowers/specs/2026-10-21-hummina-app-phase2-design.md`.
+- **Design spec:** `docs/superpowers/specs/2026-10-21-hummyna-app-phase2-design.md`.
 
 ## Roadmap (phases)
 | Phase | Deliverable | Status |
@@ -48,7 +48,7 @@ separate private repo.
   branch off it).
 
 ## Next steps (P2.1 tasks 3–9 — see the plan)
-`docs/superpowers/plans/2026-10-21-hummina-app-p2.1-app-shell.md`
+`docs/superpowers/plans/2026-10-21-hummyna-app-p2.1-app-shell.md`
 
 3. RN inflate adapter (`fflate`) — quick, Node-testable.
 4. **SPIKE** — `ByteSource` over `expo-file-system` (ranged reads over `content://`).

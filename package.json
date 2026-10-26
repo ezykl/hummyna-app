@@ -1,5 +1,5 @@
 {
-  "name": "hummina-app",
+  "name": "hummyna-app",
   "private": true,
   "main": "expo-router/entry",
   "workspaces": ["packages/*"],
@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "npm run lint --workspaces --if-present && tsc --noEmit",
-    "test": "npm run test --workspaces --if-present && jest"
+    "test": "npm run test --workspaces --if-present && jest",
+    "scrub": "node scripts/scrub.mjs"
   },
   "dependencies": {
     "@hummina/hmp": "*",

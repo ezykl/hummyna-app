@@ -8,7 +8,7 @@
 
 **Tech Stack:** Expo SDK (latest stable) + React Native + TypeScript · Expo Router · expo-sqlite · expo-file-system · expo-document-picker · jest-expo · the existing `@hummina/hmp` package.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-hummina-app-phase2-design.md` (§6)
+**Spec:** `docs/superpowers/specs/2026-10-21-hummyna-app-phase2-design.md` (§6)
 **Lessons from P2.0:** the reader is random-access over `ByteSource` with `CryptoAdapter`/`InflateAdapter` seams (`packages/hmp/src/*`).
 
 ## Global Constraints

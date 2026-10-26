@@ -15,7 +15,7 @@ The **writer/packer** (HumMyna Studio) lives in a separate, private repo.
 ## Status
 
 Phase 2 design approved; implementation not yet started. See
-`docs/superpowers/specs/2026-10-21-hummina-app-phase2-design.md`.
+`docs/superpowers/specs/2026-10-21-hummyna-app-phase2-design.md`.
 
 ## The format
 
