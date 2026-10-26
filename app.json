@@ -1,21 +1,21 @@
 {
   "expo": {
     "name": "HumMyna",
-    "slug": "hummina",
-    "scheme": "hummina",
+    "slug": "hummyna",
+    "scheme": "hummyna",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.hummina",
+      "bundleIdentifier": "app.hummyna",
       "infoPlist": {
         "UIFileSharingEnabled": true,
         "LSSupportsOpeningDocumentsInPlace": true
       }
     },
     "android": {
-      "package": "app.hummina"
+      "package": "app.hummyna"
     },
     "web": {
       "output": "static"

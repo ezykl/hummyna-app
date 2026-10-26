@@ -30,7 +30,7 @@
 - Create: `packages/hmp/tests/smoke.test.ts`
 
 **Interfaces:**
-- Produces: workspace root + `@hummina/hmp` package with `test`/`lint` scripts.
+- Produces: workspace root + `@hummyna/hmp` package with `test`/`lint` scripts.
 
 - [ ] **Step 1: Root workspace `package.json`**
 
@@ -51,7 +51,7 @@
 
 ```json
 {
-  "name": "@hummina/hmp",
+  "name": "@hummyna/hmp",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -104,7 +104,7 @@ export default defineConfig({ test: { environment: "node", include: ["tests/**/*
 - [ ] **Step 5: `packages/hmp/src/index.ts`** (placeholder export to be filled in later tasks)
 
 ```ts
-export const HMP_PACKAGE = "@hummina/hmp";
+export const HMP_PACKAGE = "@hummyna/hmp";
 ```
 
 - [ ] **Step 6: Failing-then-passing smoke test**
@@ -116,7 +116,7 @@ import { HMP_PACKAGE } from "../src/index";
 
 describe("hmp package", () => {
   it("is set up", () => {
-    expect(HMP_PACKAGE).toBe("@hummina/hmp");
+    expect(HMP_PACKAGE).toBe("@hummyna/hmp");
   });
 });
 ```

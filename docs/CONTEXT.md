@@ -5,7 +5,7 @@ Single-file map for a fresh session. Read this, then the spec and the current pl
 ## What this is
 The **cross-platform karaoke player** for `.hmp` libraries — **open source**
 (public repo `ezykl/hummyna-app`). It carries the open half of the format (the
-**reader**, `@hummina/hmp`). The writer/packer ("HumMyna Studio") lives in a
+**reader**, `@hummyna/hmp`). The writer/packer ("HumMyna Studio") lives in a
 separate private repo.
 
 - **Stack:** Expo SDK 58 · React Native 0.88 · React 19.3 · TypeScript ~6 ·
@@ -40,7 +40,7 @@ separate private repo.
   `ByteSource`, random-access reader (verified vs golden `.hmp`), tamper suite,
   `parseLyrics` (tempo map), public API. **31 vitest tests**.
 - **P2.1 Task 2 done:** repo is an Expo app (expo-router; routes in `src/app/`);
-  npm workspaces; `@hummina/hmp` wired; `app.json` ids `app.hummina` +
+  npm workspaces; `@hummyna/hmp` wired; `app.json` ids `app.hummyna` +
   iOS `UIFileSharingEnabled`/`LSSupportsOpeningDocumentsInPlace`;
   `metro.config.js` monorepo config; `main: expo-router/entry`.
   **Green:** `npm run lint` (reader tsc + app tsc) · `npm test` = 31 vitest + 1 jest.

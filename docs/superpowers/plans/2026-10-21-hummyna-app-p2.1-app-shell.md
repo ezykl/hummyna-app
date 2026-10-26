@@ -6,7 +6,7 @@
 
 **Architecture:** The repo becomes an Expo (Expo Router) app at its root; `packages/hmp` stays the workspace reader. RN-specific `CryptoAdapter`/`InflateAdapter` implementations and a `ByteSource` over `expo-file-system` satisfy the reader's seams. Song metadata (path + number/title/singer/offset/length) is indexed into `expo-sqlite`; the big `.hmp` bytes are never copied into the DB (Android reads in place via SAF; iOS via the Files-visible Documents folder).
 
-**Tech Stack:** Expo SDK (latest stable) + React Native + TypeScript · Expo Router · expo-sqlite · expo-file-system · expo-document-picker · jest-expo · the existing `@hummina/hmp` package.
+**Tech Stack:** Expo SDK (latest stable) + React Native + TypeScript · Expo Router · expo-sqlite · expo-file-system · expo-document-picker · jest-expo · the existing `@hummyna/hmp` package.
 
 **Spec:** `docs/superpowers/specs/2026-10-21-hummyna-app-phase2-design.md` (§6)
 **Lessons from P2.0:** the reader is random-access over `ByteSource` with `CryptoAdapter`/`InflateAdapter` seams (`packages/hmp/src/*`).
@@ -37,7 +37,7 @@
 - [ ] **Step 2: Implement `rnCryptoAdapter`** using the candidate that (i) is MIT/BSD-permissive, (ii) supports all three ops, (iii) is practical on RN. Wrap it to the `CryptoAdapter` interface exactly:
 
 ```ts
-import type { CryptoAdapter } from "@hummina/hmp";
+import type { CryptoAdapter } from "@hummyna/hmp";
 export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSignPublic, unwrapKey, decrypt, verifyIndex */ };
 ```
 
@@ -52,11 +52,11 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 - Modify: `package.json` (root → Expo app + workspaces), `tsconfig.json`, `app.json`, `metro.config.js`, `babel.config.js`, `.gitignore`
 - Create: `app/_layout.tsx`, `app/index.tsx`, `jest.config.js`, `tests/app/smoke.test.ts`
 
-**Interfaces:** root project is a runnable Expo app that resolves `@hummina/hmp` from the workspace.
+**Interfaces:** root project is a runnable Expo app that resolves `@hummyna/hmp` from the workspace.
 
 - [ ] **Step 1: Scaffold** with `npx create-expo-app@latest . --template blank-typescript` (into the existing repo; keep `packages/hmp`, `docs/`), then add Expo Router (`npx expo install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar`).
-- [ ] **Step 2: Monorepo config** — `metro.config.js` with `watchFolders: [workspaceRoot]` + `resolver.nodeModulesPaths`; ensure `packages/hmp` resolves as `@hummina/hmp` (add `"@hummina/hmp": "*"` to the app's deps and a `tsconfig` path or rely on workspaces).
-- [ ] **Step 3: Identifiers** — `app.json`: name `HumMyna`, slug `hummina`, `scheme` `hummina`, android package `app.hummina`, ios bundle id `app.hummina`, plus iOS `infoPlist: { UIFileSharingEnabled: true, LSSupportsOpeningDocumentsInPlace: true }`.
+- [ ] **Step 2: Monorepo config** — `metro.config.js` with `watchFolders: [workspaceRoot]` + `resolver.nodeModulesPaths`; ensure `packages/hmp` resolves as `@hummyna/hmp` (add `"@hummyna/hmp": "*"` to the app's deps and a `tsconfig` path or rely on workspaces).
+- [ ] **Step 3: Identifiers** — `app.json`: name `HumMyna`, slug `hummyna`, `scheme` `hummyna`, android package `app.hummyna`, ios bundle id `app.hummyna`, plus iOS `infoPlist: { UIFileSharingEnabled: true, LSSupportsOpeningDocumentsInPlace: true }`.
 - [ ] **Step 4: jest-expo** — add `jest-expo`, a `test` script, and a smoke test rendering the root screen.
 - [ ] **Step 5: Gate + commit** `chore(app): scaffold Expo app shell (monorepo)`
 
@@ -152,6 +152,6 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Spec coverage:** §6 (SAF/Files folder, import → SQLite, FTS search, storage mgmt) → Tasks 4-9; reader wiring + RN adapters (§4/§5 seams) → Tasks 1-4. Playback/recording/scoring are later sub-projects.
 **Placeholder scan:** no TBD; each task lists concrete files + the command or code shape. Two tasks are explicitly **spikes** (crypto strategy, ByteSource ranged reads) with a named decision procedure and a Node-testable deliverable — not vague.
-**Type consistency:** `CryptoAdapter`/`InflateAdapter`/`ByteSource` come from `@hummina/hmp` (P2.0); `Library`/`Song`/`importLibrary`/`pickHmpFiles` named once (Tasks 5-7) and consumed in Tasks 7-9.
+**Type consistency:** `CryptoAdapter`/`InflateAdapter`/`ByteSource` come from `@hummyna/hmp` (P2.0); `Library`/`Song`/`importLibrary`/`pickHmpFiles` named once (Tasks 5-7) and consumed in Tasks 7-9.
 **Robustness:** browsing needs only unwrap+verify (no inflate), so P2.1 is usable before playback lands.
 **Device-only items** (SAF grant, Files-visible Documents dir, real ranged reads) are called out as manual verification.

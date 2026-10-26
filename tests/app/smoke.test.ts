@@ -1,4 +1,4 @@
-import { HEADER_SIZE, openHmp, parseLyrics } from "@hummina/hmp";
+import { HEADER_SIZE, openHmp, parseLyrics } from "@hummyna/hmp";
 
 describe("app shell", () => {
   it("resolves the workspace reader package", () => {
