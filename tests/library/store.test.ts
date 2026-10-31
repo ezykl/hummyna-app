@@ -62,7 +62,26 @@ describe("library store", () => {
     const store = await freshStore();
     await store.addLibrary({ name: "Pop", path: "p" }, songs);
     expect(await store.searchSongs("")).toHaveLength(3);
-    expect(await store.searchSongs("", 2)).toHaveLength(2);
+    expect(await store.searchSongs("", { limit: 2 })).toHaveLength(2);
+  });
+
+  it("scopes search to a single library", async () => {
+    const store = await freshStore();
+    const a = await store.addLibrary({ name: "A", path: "a" }, songs);
+    await store.addLibrary({ name: "B", path: "b" }, [
+      { number: 9, title: "G2", singer: "S2", offset: 0, length: 1 },
+    ]);
+    expect(await store.searchSongs("")).toHaveLength(4);
+    const scoped = await store.searchSongs("G2", { libraryId: a.libraryId });
+    expect(scoped).toHaveLength(1);
+    expect(scoped[0].libraryId).toBe(a.libraryId);
+  });
+
+  it("treats LIKE metacharacters literally", async () => {
+    const store = await freshStore();
+    await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    expect(await store.searchSongs("%")).toHaveLength(0);
+    expect(await store.searchSongs("G_")).toHaveLength(0);
   });
 
   it("deletes a library and its songs", async () => {

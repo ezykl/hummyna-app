@@ -1,5 +1,5 @@
 import type { Library, LibraryStore } from "../../src/library/store";
-import { formatBytes, libraryUsage } from "../../src/library/storage";
+import { formatBytes, formatUsage, libraryUsage } from "../../src/library/storage";
 
 function fakeStore(libs: Array<Partial<Library>>): LibraryStore {
   const libraries = libs.map((l, i) => ({
@@ -29,6 +29,13 @@ describe("formatBytes", () => {
     expect(formatBytes(1536)).toBe("1.5 KB");
     expect(formatBytes(1048576)).toBe("1.0 MB");
     expect(formatBytes(1073741824)).toBe("1.0 GB");
+  });
+});
+
+describe("formatUsage", () => {
+  it("summarises libraries, songs, and bytes (with singular forms)", () => {
+    expect(formatUsage({ libraries: 1, songs: 1, bytes: 0 })).toBe("1 library · 1 song · 0 B");
+    expect(formatUsage({ libraries: 2, songs: 5, bytes: 1536 })).toBe("2 libraries · 5 songs · 1.5 KB");
   });
 });
 

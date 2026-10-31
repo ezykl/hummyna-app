@@ -45,10 +45,15 @@ export interface AddLibraryResult {
   songCount: number;
 }
 
+export interface SearchOptions {
+  libraryId?: number;
+  limit?: number;
+}
+
 export interface LibraryStore {
   addLibrary(meta: NewLibrary, songs: NewSong[]): Promise<AddLibraryResult>;
   listLibraries(): Promise<Library[]>;
-  searchSongs(query: string, limit?: number): Promise<Song[]>;
+  searchSongs(query: string, options?: SearchOptions): Promise<Song[]>;
   deleteLibrary(id: number): Promise<void>;
 }
 
@@ -122,9 +127,18 @@ async function inTransaction<T>(adapter: SqliteAdapter, fn: () => Promise<T>): P
     await adapter.exec("COMMIT");
     return result;
   } catch (err) {
-    await adapter.exec("ROLLBACK");
+    try {
+      await adapter.exec("ROLLBACK");
+    } catch {
+      // keep the original error — a failed rollback must not mask it
+    }
     throw err;
   }
+}
+
+/** Escapes SQL LIKE metacharacters so a query of `%`/`_` is treated literally. */
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
 export function createLibraryStore(adapter: SqliteAdapter): LibraryStore {
@@ -152,20 +166,27 @@ export function createLibraryStore(adapter: SqliteAdapter): LibraryStore {
       return rows.map(toLibrary);
     },
 
-    async searchSongs(query: string, limit = 50): Promise<Song[]> {
+    async searchSongs(query: string, options: SearchOptions = {}): Promise<Song[]> {
+      const { libraryId, limit = 50 } = options;
+      const clauses: string[] = [];
+      const params: SqlValue[] = [];
       const q = query.trim();
-      if (q === "") {
-        const rows = await adapter.all<SongRow>(
-          "SELECT * FROM songs ORDER BY title COLLATE NOCASE LIMIT ?",
-          [limit],
+      if (q !== "") {
+        const like = `%${escapeLike(q)}%`;
+        clauses.push(
+          "(title LIKE ? ESCAPE '\\' OR singer LIKE ? ESCAPE '\\' OR CAST(number AS TEXT) LIKE ? ESCAPE '\\')",
         );
-        return rows.map(toSong);
+        params.push(like, like, like);
       }
-      const like = `%${q}%`;
+      if (libraryId !== undefined) {
+        clauses.push("library_id = ?");
+        params.push(libraryId);
+      }
+      const where = clauses.length > 0 ? ` WHERE ${clauses.join(" AND ")}` : "";
+      params.push(limit);
       const rows = await adapter.all<SongRow>(
-        "SELECT * FROM songs WHERE title LIKE ? OR singer LIKE ? OR CAST(number AS TEXT) LIKE ?" +
-          " ORDER BY title COLLATE NOCASE LIMIT ?",
-        [like, like, like, limit],
+        `SELECT * FROM songs${where} ORDER BY title COLLATE NOCASE LIMIT ?`,
+        params,
       );
       return rows.map(toSong);
     },

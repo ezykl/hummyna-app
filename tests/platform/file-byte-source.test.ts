@@ -77,4 +77,11 @@ describe("fileByteSource", () => {
     expect(Array.from(a)).toEqual(Array.from(mockBytes.subarray(0, 10)));
     expect(Array.from(b)).toEqual(Array.from(mockBytes.subarray(50, 60)));
   });
+
+  it("closes the underlying handle", async () => {
+    const src = await fileByteSource("file:///library.hmp");
+    src.close();
+    expect(mockHandle.close).toHaveBeenCalledTimes(1);
+    expect(mockHandle.closed).toBe(true);
+  });
 });

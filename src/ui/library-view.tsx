@@ -6,22 +6,31 @@ export function LibrariesView({
   libraries,
   onImport,
   onOpen,
+  onDelete,
+  summary,
 }: {
   libraries: Library[];
   onImport: () => void;
   onOpen?: (library: Library) => void;
+  onDelete?: (library: Library) => void;
+  summary?: string;
 }) {
   return (
     <View style={styles.container}>
       <Pressable style={styles.button} onPress={onImport} accessibilityRole="button">
         <Text style={styles.buttonText}>Import library</Text>
       </Pressable>
+      {summary ? <Text style={styles.sub}>{summary}</Text> : null}
       <FlatList
         data={libraries}
         keyExtractor={(l) => String(l.id)}
         ListEmptyComponent={<Text style={styles.empty}>No libraries yet. Import a folder of .hmp files.</Text>}
         renderItem={({ item }) => (
-          <Pressable style={styles.row} onPress={() => onOpen?.(item)}>
+          <Pressable
+            style={styles.row}
+            onPress={() => onOpen?.(item)}
+            onLongPress={() => onDelete?.(item)}
+          >
             <Text style={styles.title}>{item.name}</Text>
             <Text style={styles.sub}>{item.songCount} songs</Text>
           </Pressable>
@@ -37,13 +46,13 @@ export function LibraryDetailView({ library, store }: { library: Library; store:
 
   useEffect(() => {
     let active = true;
-    store.searchSongs(query).then((rows) => {
+    store.searchSongs(query, { libraryId: library.id }).then((rows) => {
       if (active) setSongs(rows);
     });
     return () => {
       active = false;
     };
-  }, [query, store]);
+  }, [query, store, library.id]);
 
   return (
     <View style={styles.container}>

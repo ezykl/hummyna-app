@@ -23,15 +23,18 @@ class FakeStore implements LibraryStore {
 }
 
 const sourceFor =
-  (bytes: Uint8Array) =>
-  async (_uri: string): Promise<ByteSource> =>
-    memoryByteSource(bytes);
+  (bytes: Uint8Array, close?: () => void) =>
+  async (_uri: string): Promise<ByteSource & { close?: () => void }> => ({
+    ...memoryByteSource(bytes),
+    close,
+  });
 
 describe("importLibrary", () => {
-  it("imports the golden .hmp: one library row + three songs", async () => {
+  it("imports the golden .hmp: one library row + three songs, then closes the source", async () => {
     const store = new FakeStore();
+    const close = jest.fn();
     const result = await importLibrary("file:///library.hmp", "Golden", {
-      sourceFor: sourceFor(fixture("library.hmp")),
+      sourceFor: sourceFor(fixture("library.hmp"), close),
       keys,
       store,
       crypto: rnCryptoAdapter,
@@ -44,23 +47,26 @@ describe("importLibrary", () => {
     expect(meta).toEqual({ name: "Golden", path: "file:///library.hmp" });
     expect(songs.map((s) => s.title)).toEqual(["G1", "G2", "G3"]);
     expect(songs[0]).toMatchObject({ number: 1, singer: "S1", title: "G1", length: 80 });
+    expect(close).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects a corrupt file with a friendly error and writes nothing", async () => {
+  it("rejects a corrupt file with the reader's error and writes nothing", async () => {
     const corrupt = fixture("library.hmp").slice();
     corrupt[0] = 0x00;
     const store = new FakeStore();
+    const close = jest.fn();
 
     await expect(
       importLibrary("file:///bad.hmp", "Bad", {
-        sourceFor: sourceFor(corrupt),
+        sourceFor: sourceFor(corrupt, close),
         keys,
         store,
         crypto: rnCryptoAdapter,
         inflate: rnInflateAdapter,
       }),
-    ).rejects.toThrow(/import|not an HMP1|corrupt|magic/i);
+    ).rejects.toThrow(/bad magic/i);
 
     expect(store.addLibrary).not.toHaveBeenCalled();
+    expect(close).toHaveBeenCalledTimes(1);
   });
 });

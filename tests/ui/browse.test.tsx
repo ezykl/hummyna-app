@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
-import type { Library, LibraryStore, Song } from "../../src/library/store";
+import type { Library, LibraryStore, SearchOptions, Song } from "../../src/library/store";
 import { LibrariesView, LibraryDetailView } from "../../src/ui/library-view";
 
 const library: Library = { id: 1, name: "Pop", path: "content://pop", songCount: 3, createdAt: 0 };
@@ -8,15 +8,18 @@ const allSongs: Song[] = [
   { id: 1, libraryId: 1, number: 1, title: "G1", singer: "S1", offset: 100, length: 80 },
   { id: 2, libraryId: 1, number: 2, title: "G2", singer: "S2", offset: 200, length: 109 },
   { id: 3, libraryId: 1, number: 3, title: "G3", singer: "S3", offset: 300, length: 88 },
+  { id: 4, libraryId: 2, number: 9, title: "Elsewhere", singer: "S9", offset: 0, length: 1 },
 ];
 
 function fakeStore(): LibraryStore {
-  const searchSongs = jest.fn(async (query: string, limit = 50) => {
+  const searchSongs = jest.fn(async (query: string, options: SearchOptions = {}) => {
     const q = query.trim();
-    const rows = q
-      ? allSongs.filter((s) => s.title.includes(q) || s.singer.includes(q))
-      : allSongs;
-    return rows.slice(0, limit);
+    let rows = allSongs;
+    if (options.libraryId !== undefined) {
+      rows = rows.filter((s) => s.libraryId === options.libraryId);
+    }
+    if (q) rows = rows.filter((s) => s.title.includes(q) || s.singer.includes(q));
+    return rows.slice(0, options.limit ?? 50);
   });
   return {
     addLibrary: jest.fn(),
@@ -34,6 +37,7 @@ describe("LibraryDetailView", () => {
     expect(await screen.findByText("G1")).toBeTruthy();
     expect(screen.getByText("G2")).toBeTruthy();
     expect(screen.getByText("G3")).toBeTruthy();
+    expect(screen.queryByText("Elsewhere")).toBeNull();
 
     fireEvent.changeText(screen.getByPlaceholderText(/search/i), "G2");
 

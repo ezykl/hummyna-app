@@ -5,6 +5,7 @@ import type { Library, LibraryStore } from "../library/db";
 import { openLibraryDb } from "../library/db";
 import { importLibrary } from "../library/import";
 import { libraryKeys } from "../library/keys";
+import { deleteLibraryFile, formatUsage, libraryUsage } from "../library/storage";
 import { fileByteSource } from "../platform/file-byte-source";
 import { pickHmpFiles } from "../platform/pick-library";
 import { rnCryptoAdapter } from "../platform/rn-crypto";
@@ -21,9 +22,11 @@ export default function LibrariesScreen() {
   const router = useRouter();
   const [store, setStore] = useState<LibraryStore | null>(null);
   const [libraries, setLibraries] = useState<Library[]>([]);
+  const [summary, setSummary] = useState("");
 
   const refresh = useCallback(async (s: LibraryStore) => {
     setLibraries(await s.listLibraries());
+    setSummary(formatUsage(await libraryUsage(s)));
   }, []);
 
   useEffect(() => {
@@ -31,16 +34,17 @@ export default function LibrariesScreen() {
     openLibraryDb().then(async (s) => {
       if (!active) return;
       setStore(s);
-      setLibraries(await s.listLibraries());
+      await refresh(s);
     });
     return () => {
       active = false;
     };
-  }, []);
+  }, [refresh]);
 
   const onImport = useCallback(async () => {
     if (!store) return;
     try {
+      const keys = libraryKeys();
       const picked = await pickHmpFiles();
       let imported = 0;
       let failed = 0;
@@ -48,7 +52,7 @@ export default function LibrariesScreen() {
         try {
           await importLibrary(file.uri, file.name, {
             sourceFor: fileByteSource,
-            keys: libraryKeys(),
+            keys,
             store,
             crypto: rnCryptoAdapter,
             inflate: rnInflateAdapter,
@@ -65,10 +69,31 @@ export default function LibrariesScreen() {
     }
   }, [store, refresh]);
 
+  const onDelete = useCallback(
+    (library: Library) => {
+      if (!store) return;
+      Alert.alert("Delete library", `Remove "${library.name}" and its ${library.songCount} songs?`, [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await store.deleteLibrary(library.id);
+            await deleteLibraryFile(library.path);
+            await refresh(store);
+          },
+        },
+      ]);
+    },
+    [store, refresh],
+  );
+
   return (
     <LibrariesView
       libraries={libraries}
+      summary={summary}
       onImport={onImport}
+      onDelete={onDelete}
       onOpen={(lib) => router.push({ pathname: "/library/[id]", params: { id: String(lib.id) } })}
     />
   );

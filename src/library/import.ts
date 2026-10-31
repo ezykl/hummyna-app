@@ -2,9 +2,13 @@ import type { ByteSource, CryptoAdapter, InflateAdapter, LibraryKeys } from "@hu
 import { openHmp } from "@hummyna/hmp";
 import type { LibraryStore, NewSong } from "./store";
 
+export interface DisposableSource extends ByteSource {
+  close?(): void;
+}
+
 export interface ImportDeps {
   /** Resolves a readable random-access source for a library URI (Task 4 wires this to expo-file-system). */
-  sourceFor(uri: string): Promise<ByteSource>;
+  sourceFor(uri: string): Promise<DisposableSource>;
   keys: LibraryKeys;
   store: LibraryStore;
   crypto?: CryptoAdapter;
@@ -48,6 +52,9 @@ export async function importLibrary(
     }));
   } catch (err) {
     throw friendly(name, err);
+  } finally {
+    // All needed bytes (footer, index, key block) are read during open/verify.
+    source.close?.();
   }
 
   return deps.store.addLibrary({ name, path: uri }, songs);

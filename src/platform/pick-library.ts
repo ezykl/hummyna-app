@@ -9,9 +9,13 @@ export interface PickedLibrary {
 
 /** Pure: derive a display name for an (optionally percent-encoded) SAF/file URI. */
 export function hmpNameFromUri(uri: string): string {
-  const decoded = decodeURIComponent(uri);
-  const last = decoded.split(/[\\/]/).pop() ?? decoded;
-  return last;
+  let decoded = uri;
+  try {
+    decoded = decodeURIComponent(uri);
+  } catch {
+    // a stray '%' makes the URI undecodable — fall back to the raw string
+  }
+  return decoded.split(/[\\/]/).pop() ?? decoded;
 }
 
 export function isHmpName(name: string): boolean {

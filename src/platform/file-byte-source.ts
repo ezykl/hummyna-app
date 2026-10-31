@@ -16,6 +16,11 @@ export function clampRead(offset: number, length: number, size: number): Range {
   return { offset: start, length: end - start };
 }
 
+export interface DisposableByteSource extends ByteSource {
+  /** Releases the underlying file descriptor. Call when done reading. */
+  close(): void;
+}
+
 interface Handle {
   offset: number | null;
   readBytes(length: number): Promise<Uint8Array>;
@@ -55,11 +60,11 @@ export function byteSourceFromHandle(size: number, handle: Handle): ByteSource {
  * Device check (manual): grant an Android SAF folder and confirm a `.hmp`
  * opens; the safe default for `content://` is `FileMode.ReadOnly`.
  */
-export async function fileByteSource(uri: string): Promise<ByteSource> {
+export async function fileByteSource(uri: string): Promise<DisposableByteSource> {
   const file = new File(uri);
   const size = file.size;
   const handle = file.open(FileMode.ReadOnly);
-  return byteSourceFromHandle(size, {
+  const source = byteSourceFromHandle(size, {
     get offset() {
       return handle.offset;
     },
@@ -68,4 +73,9 @@ export async function fileByteSource(uri: string): Promise<ByteSource> {
     },
     readBytes: (length: number) => handle.readBytes(length),
   });
+  return {
+    size: source.size,
+    read: (offset, length) => source.read(offset, length),
+    close: () => handle.close(),
+  };
 }

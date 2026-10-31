@@ -20,6 +20,12 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(1)} ${UNITS[unit]}`;
 }
 
+export function formatUsage(usage: LibraryUsage): string {
+  const libs = `${usage.libraries} ${usage.libraries === 1 ? "library" : "libraries"}`;
+  const songs = `${usage.songs} ${usage.songs === 1 ? "song" : "songs"}`;
+  return `${libs} · ${songs} · ${formatBytes(usage.bytes)}`;
+}
+
 /** Reads a file's size; returns 0 when the file is missing or unreadable (e.g. SAF). */
 export async function sizeOfFile(uri: string): Promise<number> {
   try {

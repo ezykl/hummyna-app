@@ -21,9 +21,17 @@ export function expoSqliteAdapter(db: SQLite.SQLiteDatabase): SqliteAdapter {
   };
 }
 
-export async function openLibraryDb(name = "hummyna.db"): Promise<LibraryStore> {
-  const db = SQLite.openDatabaseSync(name);
-  const adapter = expoSqliteAdapter(db);
-  await migrate(adapter);
-  return createLibraryStore(adapter);
+let cached: Promise<LibraryStore> | undefined;
+
+/** Opens (once) and migrates the library database, returning a shared store. */
+export function openLibraryDb(name = "hummyna.db"): Promise<LibraryStore> {
+  if (!cached) {
+    cached = (async () => {
+      const db = SQLite.openDatabaseSync(name);
+      const adapter = expoSqliteAdapter(db);
+      await migrate(adapter);
+      return createLibraryStore(adapter);
+    })();
+  }
+  return cached;
 }
