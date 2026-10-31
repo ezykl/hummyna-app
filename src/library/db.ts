@@ -31,7 +31,10 @@ export function openLibraryDb(name = "hummyna.db"): Promise<LibraryStore> {
       const adapter = expoSqliteAdapter(db);
       await migrate(adapter);
       return createLibraryStore(adapter);
-    })();
+    })().catch((err) => {
+      cached = undefined; // a transient open/migrate failure must not poison future calls
+      throw err;
+    });
   }
   return cached;
 }

@@ -5,7 +5,11 @@ const appJson = require("./app.json");
 const raw = process.env.HUMMYNA_LIBRARY_KEYS;
 const extra = { ...(appJson.expo.extra ?? {}) };
 if (raw) {
-  extra.hummynaLibraryKeys = JSON.parse(raw);
+  try {
+    extra.hummynaLibraryKeys = JSON.parse(raw);
+  } catch {
+    throw new Error("HUMMYNA_LIBRARY_KEYS must be JSON of { wrapPrivateJwk, signPublicJwk }");
+  }
 }
 
 module.exports = {
