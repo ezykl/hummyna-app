@@ -2,7 +2,9 @@
   "name": "hummyna-app",
   "private": true,
   "main": "expo-router/entry",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -19,14 +21,16 @@
     "expo-linking": "~58.0.14",
     "expo-router": "~58.0.26",
     "expo-status-bar": "~58.0.4",
+    "pako": "^3.0.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.0",
-    "react-native-web": "~0.21.4",
     "react-native-safe-area-context": "~5.10.1",
-    "react-native-screens": "~4.30.0"
+    "react-native-screens": "~4.30.0",
+    "react-native-web": "~0.21.4"
   },
   "devDependencies": {
+    "@types/pako": "^2.0.4",
     "@types/react": "~19.3.0",
     "jest": "~30.5.2",
     "jest-expo": "~58.0.12",
@@ -34,6 +38,9 @@
   },
   "jest": {
     "preset": "jest-expo",
-    "testPathIgnorePatterns": ["/node_modules/", "/packages/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/packages/"
+    ]
   }
 }
