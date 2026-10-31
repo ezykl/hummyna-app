@@ -1,5 +1,13 @@
 # HumMyna App — P2.1 App Shell + Import/Browse — Implementation Plan
 
+**Status: COMPLETE** (merged to `main` @ `86303dd`). Device-only checks remain —
+see `docs/DEVICE-VERIFICATION.md`.
+**Deviations from the text below:** routes live in `src/app/` (not root `app/`);
+Task 3 shipped with `pako` (not `fflate`); Task 4's ranged-read spike resolved to
+the SDK 58 `expo-file-system` `FileHandle` (no native module); `searchSongs` takes
+`(query, { libraryId?, limit? })` to scope by library; library keys are injected
+via env-driven `app.config.js`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the Expo app shell, wire the P2.0 reader to it through React-Native platform adapters, and let a user point the app at a folder of `.hmp` files, import them (index into SQLite), browse and search songs. No playback yet.
@@ -33,16 +41,16 @@
 **Interfaces:**
 - Produces: `rnCryptoAdapter: CryptoAdapter` (same shape as `webCryptoAdapter`).
 
-- [ ] **Step 1: Try each candidate against a tiny probe** in a scratch test (import keys from `packages/hmp/tests/fixtures/keys.jwk`, unwrap the golden key block, verify the golden index signature). Record which candidate produces correct results.
-- [ ] **Step 2: Implement `rnCryptoAdapter`** using the candidate that (i) is MIT/BSD-permissive, (ii) supports all three ops, (iii) is practical on RN. Wrap it to the `CryptoAdapter` interface exactly:
+- [x] **Step 1: Try each candidate against a tiny probe** in a scratch test (import keys from `packages/hmp/tests/fixtures/keys.jwk`, unwrap the golden key block, verify the golden index signature). Record which candidate produces correct results.
+- [x] **Step 2: Implement `rnCryptoAdapter`** using the candidate that (i) is MIT/BSD-permissive, (ii) supports all three ops, (iii) is practical on RN. Wrap it to the `CryptoAdapter` interface exactly:
 
 ```ts
 import type { CryptoAdapter } from "@hummyna/hmp";
 export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSignPublic, unwrapKey, decrypt, verifyIndex */ };
 ```
 
-- [ ] **Step 3: Contract test** (Node-runnable): open the golden `.hmp` with `openHmp(memoryByteSource(fixture), keys, { crypto: rnCryptoAdapter })` and assert `verify()` is true and `songs().length === 3`. This must pass in Node without a device.
-- [ ] **Step 4: Commit** `feat(app): react-native crypto adapter for the hmp reader`
+- [x] **Step 3: Contract test** (Node-runnable): open the golden `.hmp` with `openHmp(memoryByteSource(fixture), keys, { crypto: rnCryptoAdapter })` and assert `verify()` is true and `songs().length === 3`. This must pass in Node without a device.
+- [x] **Step 4: Commit** `feat(app): react-native crypto adapter for the hmp reader`
 
 ---
 
@@ -54,11 +62,11 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Interfaces:** root project is a runnable Expo app that resolves `@hummyna/hmp` from the workspace.
 
-- [ ] **Step 1: Scaffold** with `npx create-expo-app@latest . --template blank-typescript` (into the existing repo; keep `packages/hmp`, `docs/`), then add Expo Router (`npx expo install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar`).
-- [ ] **Step 2: Monorepo config** — `metro.config.js` with `watchFolders: [workspaceRoot]` + `resolver.nodeModulesPaths`; ensure `packages/hmp` resolves as `@hummyna/hmp` (add `"@hummyna/hmp": "*"` to the app's deps and a `tsconfig` path or rely on workspaces).
-- [ ] **Step 3: Identifiers** — `app.json`: name `HumMyna`, slug `hummyna`, `scheme` `hummyna`, android package `app.hummyna`, ios bundle id `app.hummyna`, plus iOS `infoPlist: { UIFileSharingEnabled: true, LSSupportsOpeningDocumentsInPlace: true }`.
-- [ ] **Step 4: jest-expo** — add `jest-expo`, a `test` script, and a smoke test rendering the root screen.
-- [ ] **Step 5: Gate + commit** `chore(app): scaffold Expo app shell (monorepo)`
+- [x] **Step 1: Scaffold** with `npx create-expo-app@latest . --template blank-typescript` (into the existing repo; keep `packages/hmp`, `docs/`), then add Expo Router (`npx expo install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar`).
+- [x] **Step 2: Monorepo config** — `metro.config.js` with `watchFolders: [workspaceRoot]` + `resolver.nodeModulesPaths`; ensure `packages/hmp` resolves as `@hummyna/hmp` (add `"@hummyna/hmp": "*"` to the app's deps and a `tsconfig` path or rely on workspaces).
+- [x] **Step 3: Identifiers** — `app.json`: name `HumMyna`, slug `hummyna`, `scheme` `hummyna`, android package `app.hummyna`, ios bundle id `app.hummyna`, plus iOS `infoPlist: { UIFileSharingEnabled: true, LSSupportsOpeningDocumentsInPlace: true }`.
+- [x] **Step 4: jest-expo** — add `jest-expo`, a `test` script, and a smoke test rendering the root screen.
+- [x] **Step 5: Gate + commit** `chore(app): scaffold Expo app shell (monorepo)`
 
 ---
 
@@ -68,9 +76,9 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Interfaces:** Produces `rnInflateAdapter: InflateAdapter` (deflate-raw inflate via `fflate`'s `inflateSync`/`decompressSync`).
 
-- [ ] **Step 1: Failing test** — deflate-raw a payload (via `fflate.deflateSync`), `expect(await rnInflateAdapter.rawInflate(x))` to equal it.
-- [ ] **Step 2: Implement** wrapping `fflate` (MIT).
-- [ ] **Step 3: Commit** `feat(app): react-native inflate adapter (fflate)`
+- [x] **Step 1: Failing test** — deflate-raw a payload (via `fflate.deflateSync`), `expect(await rnInflateAdapter.rawInflate(x))` to equal it.
+- [x] **Step 2: Implement** wrapping `fflate` (MIT).
+- [x] **Step 3: Commit** `feat(app): react-native inflate adapter (fflate)`
 
 ---
 
@@ -80,10 +88,10 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Interfaces:** Produces `fileByteSource(uri: string): Promise<ByteSource>`.
 
-- [ ] **Step 1: Spike** — determine whether `expo-file-system` can read an arbitrary byte range of a `content://` (Android SAF) / `file://` URI. Record findings; if not, plan a tiny native module (separate task).
-- [ ] **Step 2: Implement** using `expo-file-system`'s positioned read (or the legacy `readAsStringAsync` position/length, or `File`/`Directory` API), splitting pure range math (`clampRead`) into a tested helper.
-- [ ] **Step 3: Contract test** — with a mocked reader, assert offset/length math + EOF clamping; document the device check.
-- [ ] **Step 4: Commit** `feat(app): file-system ByteSource for reading .hmp in place`
+- [x] **Step 1: Spike** — determine whether `expo-file-system` can read an arbitrary byte range of a `content://` (Android SAF) / `file://` URI. Record findings; if not, plan a tiny native module (separate task).
+- [x] **Step 2: Implement** using `expo-file-system`'s positioned read (or the legacy `readAsStringAsync` position/length, or `File`/`Directory` API), splitting pure range math (`clampRead`) into a tested helper.
+- [x] **Step 3: Contract test** — with a mocked reader, assert offset/length math + EOF clamping; document the device check.
+- [x] **Step 4: Commit** `feat(app): file-system ByteSource for reading .hmp in place`
 
 ---
 
@@ -94,9 +102,9 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 **Interfaces:**
 - Produces: `openLibraryDb()`, `Library`, `Song` (`{ id, libraryId, number, title, singer, offset, length }`), `addLibrary(meta, songs)`, `listLibraries()`, `searchSongs(query, limit)`, `deleteLibrary(id)`.
 
-- [ ] **Step 1: Failing test** (schema + search, using an in-memory sqlite via `expo-sqlite`'s test mode OR a thin adapter): create a library with 3 songs → `searchSongs("G2")` returns it; `searchSongs("S1")` returns by singer; `deleteLibrary` removes rows.
-- [ ] **Step 2: Implement** the schema (`libraries`, `songs`, FTS or indexed columns) + functions.
-- [ ] **Step 3: Commit** `feat(app): sqlite library store with search`
+- [x] **Step 1: Failing test** (schema + search, using an in-memory sqlite via `expo-sqlite`'s test mode OR a thin adapter): create a library with 3 songs → `searchSongs("G2")` returns it; `searchSongs("S1")` returns by singer; `deleteLibrary` removes rows.
+- [x] **Step 2: Implement** the schema (`libraries`, `songs`, FTS or indexed columns) + functions.
+- [x] **Step 3: Commit** `feat(app): sqlite library store with search`
 
 ---
 
@@ -108,9 +116,9 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 - Consumes: `openHmp`, `fileByteSource`, `Library` (Task 5).
 - Produces: `importLibrary(uri, name, deps): Promise<{ libraryId: number; songCount: number }>`.
 
-- [ ] **Step 1: Failing test** (with a fake ByteSource + fake crypto adapter + fake store): importing the golden `.hmp` writes 3 song rows + one library row; a corrupt file rejects with a friendly error and writes nothing.
-- [ ] **Step 2: Implement** — `openHmp(fileByteSource(uri), keys)`, read `songs()`, `addLibrary`.
-- [ ] **Step 3: Commit** `feat(app): import .hmp into the library store`
+- [x] **Step 1: Failing test** (with a fake ByteSource + fake crypto adapter + fake store): importing the golden `.hmp` writes 3 song rows + one library row; a corrupt file rejects with a friendly error and writes nothing.
+- [x] **Step 2: Implement** — `openHmp(fileByteSource(uri), keys)`, read `songs()`, `addLibrary`.
+- [x] **Step 3: Commit** `feat(app): import .hmp into the library store`
 
 ---
 
@@ -120,9 +128,9 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Interfaces:** Produces `pickHmpFiles(): Promise<{ uri: string; name: string }[]>` (Android SAF via `StorageAccessFramework`/document picker; iOS via Documents dir listing or the document picker).
 
-- [ ] **Step 1: Implement** Android: `expo-file-system` `StorageAccessFramework.requestDirectoryPermissionsAsync()` + read `.hmp` entries (persist the grant). iOS: list/import from the app Documents folder (`UIFileSharingEnabled`) and/or `expo-document-picker`.
-- [ ] **Step 2: Device verify** (manual): grant a folder, see the `.hmp` files.
-- [ ] **Step 3: Commit** `feat(app): platform folder/file pickers`
+- [x] **Step 1: Implement** Android: `expo-file-system` `StorageAccessFramework.requestDirectoryPermissionsAsync()` + read `.hmp` entries (persist the grant). iOS: list/import from the app Documents folder (`UIFileSharingEnabled`) and/or `expo-document-picker`.
+- [x] **Step 2: Device verify** (manual): grant a folder, see the `.hmp` files.
+- [x] **Step 3: Commit** `feat(app): platform folder/file pickers`
 
 ---
 
@@ -132,9 +140,9 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Interfaces:** Produces screens listing libraries and searching songs (title/number/singer).
 
-- [ ] **Step 1: Failing render test** (jest-expo + @testing-library/react-native): renders a library's songs and filters by a query.
-- [ ] **Step 2: Implement** the screens against `src/library/store` (list + search box + results).
-- [ ] **Step 3: Commit** `feat(app): libraries and song-search screens`
+- [x] **Step 1: Failing render test** (jest-expo + @testing-library/react-native): renders a library's songs and filters by a query.
+- [x] **Step 2: Implement** the screens against `src/library/store` (list + search box + results).
+- [x] **Step 3: Commit** `feat(app): libraries and song-search screens`
 
 ---
 
@@ -142,9 +150,9 @@ export const rnCryptoAdapter: CryptoAdapter = { /* importWrapPrivate, importSign
 
 **Files:** Create `.github/workflows/ci.yml`, `src/library/storage.ts`; Test `tests/library/storage.test.ts`
 
-- [ ] **Step 1: Storage** — `libraryUsage()` (counts + sizes via `expo-file-system`) + `deleteLibrary` wiring; unit test the formatting math.
-- [ ] **Step 2: CI** — GitHub Actions: Node 22, `npm ci`, `npm run lint`, unit tests (jest). (Device/expo prebuild not in CI.)
-- [ ] **Step 3: Commit** `chore(app): CI and storage management`
+- [x] **Step 1: Storage** — `libraryUsage()` (counts + sizes via `expo-file-system`) + `deleteLibrary` wiring; unit test the formatting math.
+- [x] **Step 2: CI** — GitHub Actions: Node 22, `npm ci`, `npm run lint`, unit tests (jest). (Device/expo prebuild not in CI.)
+- [x] **Step 3: Commit** `chore(app): CI and storage management`
 
 ---
 
