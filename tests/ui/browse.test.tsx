@@ -24,6 +24,7 @@ function fakeStore(): LibraryStore {
   return {
     addLibrary: jest.fn(),
     listLibraries: jest.fn(async () => [library]),
+    getLibrary: jest.fn(async (id: number) => (id === library.id ? library : null)),
     searchSongs,
     deleteLibrary: jest.fn(),
   };

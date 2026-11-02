@@ -13,6 +13,7 @@ function fakeStore(libs: Array<Partial<Library>>): LibraryStore {
   return {
     addLibrary: jest.fn(),
     listLibraries: jest.fn(async () => libraries),
+    getLibrary: jest.fn(async (id: number) => libraries.find((l) => l.id === id) ?? null),
     searchSongs: jest.fn(async () => []),
     deleteLibrary: jest.fn(),
   };
