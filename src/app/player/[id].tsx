@@ -51,7 +51,7 @@ export default function PlayerScreen() {
           });
           const ref = hmp.songs().find((s) => s.number === Number(number));
           if (!ref) {
-            setMessage("Song not found in this library.");
+            if (active) setMessage("Song not found in this library.");
             return;
           }
           midi = await hmp.midiFor(ref);
@@ -66,7 +66,7 @@ export default function PlayerScreen() {
         try {
           sf2 = await soundFontBytes();
         } catch (err) {
-          setMessage(err instanceof Error ? err.message : "No SoundFont configured.");
+          if (active) setMessage(err instanceof Error ? err.message : "No SoundFont configured.");
           return;
         }
 
