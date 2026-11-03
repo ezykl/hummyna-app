@@ -41,8 +41,20 @@ export class WebViewSynthEngine implements AudioEngine {
   private playing = false;
   private durationSec = 0;
   private volume = 1;
+  private readyResolved = false;
+  private resolveReady: (() => void) | null = null;
+  private readonly whenReady = new Promise<void>((resolve) => {
+    this.resolveReady = resolve;
+  });
 
   constructor(private readonly opts: SynthOptions) {}
+
+  /** Called by `SynthHost` once the WebView page has loaded. */
+  markReady(): void {
+    if (this.readyResolved) return;
+    this.readyResolved = true;
+    this.resolveReady?.();
+  }
 
   attach(ref: PostTarget | null): void {
     this.webview = ref;
@@ -79,6 +91,7 @@ export class WebViewSynthEngine implements AudioEngine {
   }
 
   async init(): Promise<void> {
+    await this.whenReady;
     if (!this.started) {
       await this.request({ type: "init" });
       this.started = true;
@@ -143,6 +156,7 @@ export function SynthHost({ engine }: { engine: WebViewSynthEngine }) {
       mediaPlaybackRequiresUserAction={false}
       allowFileAccess
       source={{ html: engine.html() }}
+      onLoadEnd={() => engine.markReady()}
       onMessage={(event: WebViewMessageEvent) => engine.handleMessage(event.nativeEvent.data)}
     />
   );

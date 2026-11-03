@@ -46,6 +46,14 @@ describe("LibraryDetailView", () => {
     expect(screen.getByText("G2")).toBeTruthy();
     expect(screen.queryByText("G3")).toBeNull();
   });
+
+  it("emits the tapped song for navigation", async () => {
+    const store = fakeStore();
+    const onOpenSong = jest.fn();
+    await render(<LibraryDetailView library={library} store={store} onOpenSong={onOpenSong} />);
+    fireEvent.press(await screen.findByText("G2"));
+    expect(onOpenSong).toHaveBeenCalledWith(expect.objectContaining({ number: 2, title: "G2" }));
+  });
 });
 
 describe("LibrariesView", () => {

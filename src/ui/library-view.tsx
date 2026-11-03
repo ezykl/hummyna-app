@@ -40,7 +40,15 @@ export function LibrariesView({
   );
 }
 
-export function LibraryDetailView({ library, store }: { library: Library; store: LibraryStore }) {
+export function LibraryDetailView({
+  library,
+  store,
+  onOpenSong,
+}: {
+  library: Library;
+  store: LibraryStore;
+  onOpenSong?: (song: Song) => void;
+}) {
   const [query, setQuery] = useState("");
   const [songs, setSongs] = useState<Song[]>([]);
 
@@ -70,10 +78,10 @@ export function LibraryDetailView({ library, store }: { library: Library; store:
         keyExtractor={(s) => String(s.id)}
         ListEmptyComponent={<Text style={styles.empty}>No matching songs.</Text>}
         renderItem={({ item }) => (
-          <View style={styles.row}>
+          <Pressable style={styles.row} onPress={() => onOpenSong?.(item)}>
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.sub}>{item.singer}</Text>
-          </View>
+          </Pressable>
         )}
       />
     </View>

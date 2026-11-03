@@ -25,11 +25,21 @@ window.__PROC_SRC = ${literal(processorJs)};
 
   var ctx = null, synth = null, seq = null, lib = null;
 
+  // Load the SpessaSynth bundle (a Blob script) before we can construct anything.
+  var libReady = new Promise(function (resolve, reject) {
+    var s = document.createElement("script");
+    s.src = blobUrl(window.__LIB_SRC);
+    s.onload = function () { resolve(); };
+    s.onerror = function () { reject(new Error("failed to load synth library")); };
+    document.head.appendChild(s);
+  });
+
   function tick() {
-    if (seq && !seq.isFinished) {
+    if (!seq) return;
+    if (!seq.isFinished) {
       post({ type: "progress", sec: seq.currentTime });
       requestAnimationFrame(tick);
-    } else if (seq) {
+    } else {
       post({ type: "progress", sec: seq.currentTime });
       post({ type: "ended" });
     }
@@ -39,8 +49,8 @@ window.__PROC_SRC = ${literal(processorJs)};
     try {
       if (cmd.type === "init") {
         ctx = new AudioContext();
-        var procUrl = blobUrl(window.__PROC_SRC);
-        await ctx.audioWorklet.addModule(procUrl);
+        await ctx.audioWorklet.addModule(blobUrl(window.__PROC_SRC));
+        await libReady;
         lib = window.SpessaSynthLib;
         synth = new lib.WorkletSynthesizer(ctx);
         post({ type: "ack", id: cmd.id });

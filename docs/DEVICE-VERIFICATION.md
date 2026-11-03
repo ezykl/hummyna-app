@@ -69,6 +69,26 @@ Latest status: **P2.1 — pending**
 - Re-importing the same file inserts duplicate rows (no dedupe yet).
 - File sizes for `content://` URIs may read as `0` (SAF).
 
+## P2.2 — Playback (WebView synth)
+
+Prereq: generate the bundled synth sources (`npm run build:synth`) and point the
+app at a license-clear SoundFont:
+```powershell
+$env:HUMMYNA_LIBRARY_KEYS = '{...}'
+# app.config.js reads expo.extra.soundFont; set it to e.g. { kind: "file", uri: "file:///.../gm.sf2" }
+```
+
+- [ ] Open an imported song from the library list → the player screen appears.
+- [ ] With a SoundFont configured, **Play** produces audible sound.
+- [ ] Play / Pause / Stop and `-10s` / `+10s` seek behave and the playhead moves.
+- [ ] Lyrics highlight the current line and advance with the music.
+- [ ] The screen stays awake while the player is open.
+- [ ] Without a SoundFont configured, the player shows a friendly error and does
+      **not** crash.
+- [ ] Android: WebView audio plays with the device volume; iOS: WKWebView allows
+      autoplay after the Play tap (`mediaPlaybackRequiresUserAction={false}`).
+- [ ] No memory blow-up on a multi-minute MIDI; progress ticks smoothly.
+
 ## Reporting
 
 When a check fails, capture: platform + OS version, app build, the exact steps,
