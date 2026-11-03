@@ -39,7 +39,11 @@ export default function PlayerScreen() {
           setMessage("Library not found.");
           return;
         }
+        // Read the song with the ByteSource held open only as long as needed.
         const source = await fileByteSource(library.path);
+        let midi: Uint8Array;
+        let title: string;
+        let singer: string;
         try {
           const hmp = await openHmp(source, libraryKeys(), {
             crypto: rnCryptoAdapter,
@@ -50,17 +54,26 @@ export default function PlayerScreen() {
             setMessage("Song not found in this library.");
             return;
           }
-          const midi = await hmp.midiFor(ref);
-          const [{ libraryJs, processorJs }, sf2] = await Promise.all([
-            loadSynthSources(),
-            soundFontBytes().catch(() => null),
-          ]);
-          const engine = new WebViewSynthEngine({ libraryJs, processorJs, sf2 });
-          if (active) {
-            setLoaded({ engine, title: ref.title, singer: ref.singer, lines: parseLyrics(midi), midi });
-          }
+          midi = await hmp.midiFor(ref);
+          title = ref.title;
+          singer = ref.singer;
         } finally {
           source.close();
+        }
+
+        // Surface a missing SoundFont instead of silently playing nothing.
+        let sf2: Uint8Array;
+        try {
+          sf2 = await soundFontBytes();
+        } catch (err) {
+          setMessage(err instanceof Error ? err.message : "No SoundFont configured.");
+          return;
+        }
+
+        const { libraryJs, processorJs } = await loadSynthSources();
+        const engine = new WebViewSynthEngine({ libraryJs, processorJs, sf2 });
+        if (active) {
+          setLoaded({ engine, title, singer, lines: parseLyrics(midi), midi });
         }
       } catch (err) {
         if (active) setMessage(err instanceof Error ? err.message : "Couldn't open this song.");

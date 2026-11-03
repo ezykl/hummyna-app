@@ -8,6 +8,7 @@ export class FakeEngine implements AudioEngine {
   volume = 1;
   initCalls = 0;
   private listeners = new Set<ProgressListener>();
+  private errorListeners = new Set<(message: string) => void>();
 
   async init(): Promise<void> {
     this.initCalls += 1;
@@ -51,7 +52,15 @@ export class FakeEngine implements AudioEngine {
     this.pos = sec;
     for (const listener of this.listeners) listener(sec);
   }
+  onError(cb: (message: string) => void): () => void {
+    this.errorListeners.add(cb);
+    return () => this.errorListeners.delete(cb);
+  }
+  emitError(message: string): void {
+    for (const listener of this.errorListeners) listener(message);
+  }
   dispose(): void {
     this.listeners.clear();
+    this.errorListeners.clear();
   }
 }

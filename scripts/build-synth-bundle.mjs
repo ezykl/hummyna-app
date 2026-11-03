@@ -4,7 +4,7 @@
 //
 // Run: npm run build:synth   (after `npm install`)
 import { build } from "esbuild";
-import { copyFileSync, mkdirSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,10 +26,11 @@ await build({
   logLevel: "warning",
 });
 
-copyFileSync(
+const processorSrc = readFileSync(
   resolve(root, "node_modules", "spessasynth_lib", "dist", "spessasynth_processor.min.js"),
-  resolve(outDir, "spessasynth_processor.txt"),
-);
+  "utf8",
+).replace(/\n?\/\/# sourceMappingURL=.*$/m, "");
+writeFileSync(resolve(outDir, "spessasynth_processor.txt"), processorSrc);
 copyFileSync(
   resolve(root, "node_modules", "spessasynth_lib", "LICENSE"),
   resolve(outDir, "LICENSE-spessasynth_lib.txt"),

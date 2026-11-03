@@ -31,6 +31,15 @@ describe("usePlayer", () => {
     expect(result.current.status).toBe("paused");
   });
 
+  it("surfaces engine-level errors", async () => {
+    const engine = new FakeEngine();
+    const { result } = await renderHook(() => usePlayer(engine));
+    await act(async () => {
+      engine.emitError("worklet failed");
+    });
+    expect(result.current.error).toMatch(/worklet failed/);
+  });
+
   it("surfaces load errors", async () => {
     const engine = new FakeEngine();
     engine.init = jest.fn(async () => {

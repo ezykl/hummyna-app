@@ -18,6 +18,8 @@ export interface AudioEngine {
   setVolume(v: number): void;
   /** Subscribe to playhead updates; returns an unsubscribe. */
   onProgress(cb: ProgressListener): () => void;
+  /** Optional: subscribe to engine-level errors; returns an unsubscribe. */
+  onError?(cb: (message: string) => void): () => void;
   dispose(): void;
 }
 

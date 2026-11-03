@@ -75,8 +75,10 @@ Prereq: generate the bundled synth sources (`npm run build:synth`) and point the
 app at a license-clear SoundFont:
 ```powershell
 $env:HUMMYNA_LIBRARY_KEYS = '{...}'
-# app.config.js reads expo.extra.soundFont; set it to e.g. { kind: "file", uri: "file:///.../gm.sf2" }
+$env:HUMMYNA_SOUNDFONT = 'file:///path/to/gm.sf2'   # app.config.js -> expo.extra.soundFont
 ```
+(The `{ kind: "asset" }` SoundFont source is a seam for a future bundled
+`require()`; today only the `file` source is configurable.)
 
 - [ ] Open an imported song from the library list → the player screen appears.
 - [ ] With a SoundFont configured, **Play** produces audible sound.

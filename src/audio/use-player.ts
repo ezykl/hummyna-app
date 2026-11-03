@@ -22,6 +22,7 @@ export function usePlayer(engine: AudioEngine): PlayerController {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => engine.onProgress(setPositionSec), [engine]);
+  useEffect(() => engine.onError?.((message) => setError(message)), [engine]);
 
   const load = useCallback(
     async (midi: Uint8Array) => {
