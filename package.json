@@ -12,7 +12,8 @@
     "web": "expo start --web",
     "lint": "npm run lint --workspaces --if-present && tsc --noEmit",
     "test": "npm run test --workspaces --if-present && jest",
-    "scrub": "node scripts/scrub.mjs"
+    "scrub": "node scripts/scrub.mjs",
+    "build:synth": "node scripts/build-synth-bundle.mjs"
   },
   "dependencies": {
     "@hummyna/hmp": "*",
@@ -21,6 +22,7 @@
     "expo-asset": "~58.0.19",
     "expo-constants": "~58.0.13",
     "expo-file-system": "~58.0.13",
+    "expo-keep-awake": "~58.0.3",
     "expo-linking": "~58.0.14",
     "expo-router": "~58.0.26",
     "expo-sqlite": "~58.0.14",
@@ -31,12 +33,15 @@
     "react-native": "0.88.0",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
-    "react-native-web": "~0.21.4"
+    "react-native-web": "~0.21.4",
+    "react-native-webview": "14.0.1",
+    "spessasynth_lib": "^4.4.2"
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.1.0",
     "@types/pako": "^2.0.4",
     "@types/react": "~19.3.0",
+    "esbuild": "^0.28.2",
     "jest": "~30.5.2",
     "jest-expo": "~58.0.12",
     "typescript": "~6.0.3"

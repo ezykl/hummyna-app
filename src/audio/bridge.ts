@@ -11,7 +11,9 @@ export type SynthCommand =
 export type SynthEvent =
   | { type: "ready" }
   | { type: "progress"; sec: number }
+  | { type: "loaded"; duration: number }
   | { type: "ended" }
+  | { type: "error"; message: string }
   | { type: "ack"; id: number }
   | { type: "nack"; id: number; message: string };
 
