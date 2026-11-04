@@ -1,4 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+
+// These render tests await async store effects + FlatList timers; CI contention
+// has tripped the default 5s budget, so allow more headroom.
+jest.setTimeout(15000);
 import type { Library, LibraryStore, SearchOptions, Song } from "../../src/library/store";
 import { LibrariesView, LibraryDetailView } from "../../src/ui/library-view";
 
