@@ -53,6 +53,7 @@ export interface SearchOptions {
 export interface LibraryStore {
   addLibrary(meta: NewLibrary, songs: NewSong[]): Promise<AddLibraryResult>;
   listLibraries(): Promise<Library[]>;
+  getLibrary(id: number): Promise<Library | null>;
   searchSongs(query: string, options?: SearchOptions): Promise<Song[]>;
   deleteLibrary(id: number): Promise<void>;
 }
@@ -164,6 +165,14 @@ export function createLibraryStore(adapter: SqliteAdapter): LibraryStore {
         "SELECT id, name, path, song_count, created_at FROM libraries ORDER BY name COLLATE NOCASE",
       );
       return rows.map(toLibrary);
+    },
+
+    async getLibrary(id: number): Promise<Library | null> {
+      const rows = await adapter.all<LibraryRow>(
+        "SELECT id, name, path, song_count, created_at FROM libraries WHERE id = ?",
+        [id],
+      );
+      return rows.length > 0 ? toLibrary(rows[0]) : null;
     },
 
     async searchSongs(query: string, options: SearchOptions = {}): Promise<Song[]> {

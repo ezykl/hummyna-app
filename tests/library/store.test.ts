@@ -92,6 +92,17 @@ describe("library store", () => {
     expect(await store.searchSongs("")).toHaveLength(0);
   });
 
+  it("gets one library by id, or null", async () => {
+    const store = await freshStore();
+    const { libraryId } = await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    expect(await store.getLibrary(libraryId)).toMatchObject({
+      id: libraryId,
+      name: "Pop",
+      songCount: 3,
+    });
+    expect(await store.getLibrary(999)).toBeNull();
+  });
+
   it("rolls back the whole add when a song insert fails", async () => {
     const store = await freshStore();
     const bad = [...songs, { number: 4, title: null as unknown as string, singer: "x", offset: 0, length: 1 }];

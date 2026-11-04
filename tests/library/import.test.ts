@@ -18,6 +18,7 @@ class FakeStore implements LibraryStore {
     return { libraryId: this.added.length, songCount: songs.length };
   });
   listLibraries = jest.fn(async () => []);
+  getLibrary = jest.fn(async () => null);
   searchSongs = jest.fn(async () => []);
   deleteLibrary = jest.fn(async () => {});
 }

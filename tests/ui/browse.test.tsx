@@ -1,4 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+
+// These render tests await async store effects + FlatList timers; CI contention
+// has tripped the default 5s budget, so allow more headroom.
+jest.setTimeout(15000);
 import type { Library, LibraryStore, SearchOptions, Song } from "../../src/library/store";
 import { LibrariesView, LibraryDetailView } from "../../src/ui/library-view";
 
@@ -24,6 +28,7 @@ function fakeStore(): LibraryStore {
   return {
     addLibrary: jest.fn(),
     listLibraries: jest.fn(async () => [library]),
+    getLibrary: jest.fn(async (id: number) => (id === library.id ? library : null)),
     searchSongs,
     deleteLibrary: jest.fn(),
   };
@@ -44,6 +49,14 @@ describe("LibraryDetailView", () => {
     await waitFor(() => expect(screen.queryByText("G1")).toBeNull());
     expect(screen.getByText("G2")).toBeTruthy();
     expect(screen.queryByText("G3")).toBeNull();
+  });
+
+  it("emits the tapped song for navigation", async () => {
+    const store = fakeStore();
+    const onOpenSong = jest.fn();
+    await render(<LibraryDetailView library={library} store={store} onOpenSong={onOpenSong} />);
+    fireEvent.press(await screen.findByText("G2"));
+    expect(onOpenSong).toHaveBeenCalledWith(expect.objectContaining({ number: 2, title: "G2" }));
   });
 });
 

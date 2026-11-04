@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text } from "react-native";
 import type { Library, LibraryStore } from "../../library/db";
@@ -7,6 +7,7 @@ import { LibraryDetailView } from "../../ui/library-view";
 
 export default function LibraryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const [store, setStore] = useState<LibraryStore | null>(null);
   const [library, setLibrary] = useState<Library | null>(null);
 
@@ -24,5 +25,16 @@ export default function LibraryDetailScreen() {
   }, [id]);
 
   if (!store || !library) return <Text style={{ padding: 16 }}>Loading…</Text>;
-  return <LibraryDetailView library={library} store={store} />;
+  return (
+    <LibraryDetailView
+      library={library}
+      store={store}
+      onOpenSong={(song) =>
+        router.push({
+          pathname: "/player/[id]",
+          params: { id: String(library.id), number: String(song.number) },
+        })
+      }
+    />
+  );
 }

@@ -12,6 +12,12 @@ if (raw) {
   }
 }
 
+// Path to the operator's license-clear GM SoundFont (a file:// URI on device).
+const sf2Uri = process.env.HUMMYNA_SOUNDFONT;
+if (sf2Uri) {
+  extra.soundFont = { kind: "file", uri: sf2Uri };
+}
+
 module.exports = {
   ...appJson.expo,
   extra,
