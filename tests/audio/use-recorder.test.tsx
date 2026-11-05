@@ -15,6 +15,7 @@ describe("useRecorder", () => {
     expect(rec.prepared).toBe(1);
     expect(rec.started).toBe(1);
     expect(result.current.status).toBe("recording");
+    expect(rec.listenerCount).toBe(1);
 
     clock = 500;
     await act(async () => {
@@ -29,6 +30,32 @@ describe("useRecorder", () => {
     });
     expect(take).toMatchObject({ uri: "file:///take.wav" });
     expect(result.current.status).toBe("idle");
+    expect(rec.listenerCount).toBe(0);
+  });
+
+  it("re-entrant start replaces the previous frame subscription", async () => {
+    const rec = new FakeMicRecorder();
+    const { result } = await renderHook(() => useRecorder(rec));
+    await act(async () => {
+      await result.current.start();
+    });
+    await act(async () => {
+      await result.current.start();
+    });
+    expect(rec.listenerCount).toBe(1);
+  });
+
+  it("disposes the recorder on unmount", async () => {
+    const rec = new FakeMicRecorder();
+    const { result, unmount } = await renderHook(() => useRecorder(rec));
+    await act(async () => {
+      await result.current.start();
+    });
+    await act(async () => {
+      unmount();
+    });
+    expect(rec.disposed).toBe(1);
+    expect(rec.listenerCount).toBe(0);
   });
 
   it("surfaces a permission error from prepare", async () => {

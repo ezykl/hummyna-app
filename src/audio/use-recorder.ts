@@ -33,6 +33,8 @@ export function useRecorder(recorder: MicRecorder, opts: { now?: () => number } 
   const start = useCallback(async () => {
     setError(null);
     setStatus("preparing");
+    unsubscribe.current?.();
+    unsubscribe.current = null;
     try {
       await recorder.prepare();
       startedAt.current = now();
@@ -43,6 +45,8 @@ export function useRecorder(recorder: MicRecorder, opts: { now?: () => number } 
       recorder.start();
       setStatus("recording");
     } catch (err) {
+      unsubscribe.current?.();
+      unsubscribe.current = null;
       setError(err instanceof Error ? err.message : String(err));
       setStatus("error");
     }
@@ -71,7 +75,14 @@ export function useRecorder(recorder: MicRecorder, opts: { now?: () => number } 
     recorder.dispose();
   }, [recorder]);
 
-  useEffect(() => () => unsubscribe.current?.(), []);
+  useEffect(
+    () => () => {
+      unsubscribe.current?.();
+      unsubscribe.current = null;
+      recorder.dispose();
+    },
+    [recorder],
+  );
 
   return { status, elapsedSec, level, error, start, stop, dispose };
 }

@@ -4,9 +4,14 @@ export class FakeMicRecorder implements MicRecorder {
   prepared = 0;
   started = 0;
   stopped = 0;
+  disposed = 0;
   failPrepare: Error | null = null;
   take: Take = { uri: "file:///take.wav", durationMs: 1234, sampleRate: 44100 };
   private listeners = new Set<FrameListener>();
+
+  get listenerCount(): number {
+    return this.listeners.size;
+  }
 
   async prepare(): Promise<void> {
     this.prepared += 1;
@@ -27,6 +32,7 @@ export class FakeMicRecorder implements MicRecorder {
     for (const listener of this.listeners) listener(pcm, sampleRate);
   }
   dispose(): void {
+    this.disposed += 1;
     this.listeners.clear();
   }
 }
