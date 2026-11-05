@@ -42,6 +42,8 @@ export function RecordView({
       </View>
       <Text style={styles.time}>{formatElapsed(elapsedSec)}</Text>
       <Pressable
+        testID="record-button"
+        accessibilityRole="button"
         style={[styles.button, busy && styles.buttonDisabled]}
         disabled={busy}
         onPress={recording ? onStop : onStart}

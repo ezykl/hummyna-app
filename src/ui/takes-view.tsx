@@ -33,10 +33,10 @@ export function TakesView({
             {formatTakeDate(take.createdAt)} · {formatDuration(take.durationMs)}
           </Text>
           <View style={styles.actions}>
-            <Pressable onPress={() => onPlay(take)}>
+            <Pressable accessibilityRole="button" onPress={() => onPlay(take)}>
               <Text style={styles.action}>Play</Text>
             </Pressable>
-            <Pressable onPress={() => onDelete(take)}>
+            <Pressable accessibilityRole="button" onPress={() => onDelete(take)}>
               <Text style={styles.actionDanger}>Delete</Text>
             </Pressable>
           </View>

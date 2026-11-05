@@ -7,7 +7,7 @@ describe("RecordView", () => {
     await render(
       <RecordView title="G1" singer="S1" status="idle" elapsedSec={0} level={0} error={null} onStart={onStart} onStop={jest.fn()} />,
     );
-    fireEvent.press(screen.getByText("Record"));
+    await fireEvent.press(screen.getByText("Record"));
     expect(onStart).toHaveBeenCalled();
   });
 
@@ -17,7 +17,7 @@ describe("RecordView", () => {
       <RecordView title="G1" singer="S1" status="recording" elapsedSec={5} level={0.5} error={null} onStart={jest.fn()} onStop={onStop} />,
     );
     expect(screen.getByText("Stop")).toBeTruthy();
-    fireEvent.press(screen.getByText("Stop"));
+    await fireEvent.press(screen.getByText("Stop"));
     expect(onStop).toHaveBeenCalled();
   });
 
@@ -27,5 +27,13 @@ describe("RecordView", () => {
     );
     expect(screen.getByTestId("recorder-error")).toBeTruthy();
     expect(formatElapsed(65)).toBe("1:05");
+    expect(formatElapsed(0)).toBe("0:00");
+  });
+
+  it("disables the button while preparing or saving", async () => {
+    await render(
+      <RecordView title="G1" singer="S1" status="preparing" elapsedSec={0} level={0} error={null} onStart={jest.fn()} onStop={jest.fn()} />,
+    );
+    expect(screen.getByTestId("record-button")).toBeDisabled();
   });
 });

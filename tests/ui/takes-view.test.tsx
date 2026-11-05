@@ -27,5 +27,6 @@ describe("TakesView", () => {
     await render(<TakesView takes={[]} onPlay={jest.fn()} onDelete={jest.fn()} />);
     expect(screen.getByText(/no takes/i)).toBeTruthy();
     expect(formatDuration(65000)).toBe("1:05");
+    expect(formatDuration(0)).toBe("0:00");
   });
 });
