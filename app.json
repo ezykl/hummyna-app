@@ -22,7 +22,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow HumMyna to use the microphone to record your voice."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
