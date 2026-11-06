@@ -11,12 +11,14 @@ export function PlayerView({
   lines,
   controller,
   onRecord,
+  onTakes,
 }: {
   title: string;
   singer: string;
   lines: LyricLine[];
   controller: PlayerController;
   onRecord?: () => void;
+  onTakes?: () => void;
 }) {
   const { status, positionSec, durationSec, error } = controller;
   const fraction = durationSec > 0 ? Math.min(1, positionSec / durationSec) : 0;
@@ -48,6 +50,9 @@ export function PlayerView({
       <View style={styles.row}>
         <Pressable accessibilityRole="button" onPress={onRecord}>
           <Text style={styles.button}>Record</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={onTakes}>
+          <Text style={styles.button}>Takes</Text>
         </Pressable>
       </View>
       <LyricsView lines={lines} timeMs={positionSec * 1000} />

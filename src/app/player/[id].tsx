@@ -119,6 +119,7 @@ function PlayerScreenInner({ engine, title, singer, lines, midi }: Loaded) {
         lines={lines}
         controller={controller}
         onRecord={() => router.push({ pathname: "/record/[id]", params: { id, number } })}
+        onTakes={() => router.push({ pathname: "/takes/[id]", params: { id, number } })}
       />
       <View style={{ height: 1 }}>
         <SynthHost engine={engine} />

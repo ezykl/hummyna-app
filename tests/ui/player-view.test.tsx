@@ -60,4 +60,13 @@ describe("PlayerView", () => {
     await fireEvent.press(screen.getByText("Record"));
     expect(onRecord).toHaveBeenCalled();
   });
+
+  it("triggers the takes list", async () => {
+    const onTakes = jest.fn();
+    await render(
+      <PlayerView title="G1" singer="S1" lines={lines} controller={stubController()} onTakes={onTakes} />,
+    );
+    await fireEvent.press(screen.getByText("Takes"));
+    expect(onTakes).toHaveBeenCalled();
+  });
 });
