@@ -22,6 +22,7 @@ export default function RecordScreen() {
   const [title, setTitle] = useState("");
   const [singer, setSinger] = useState("");
   const [midi, setMidi] = useState<Uint8Array | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -59,10 +60,18 @@ export default function RecordScreen() {
   useEffect(() => {
     if (!backing || !midi) return;
     let cancelled = false;
-    void backing
-      .init()
-      .then(() => (cancelled ? undefined : backing.load(midi)))
-      .catch(() => undefined);
+    (async () => {
+      try {
+        await backing.init();
+        await backing.load(midi);
+        if (!cancelled) setReady(true);
+      } catch (err) {
+        if (!cancelled) {
+          setMessage(err instanceof Error ? err.message : "Couldn't prepare playback.");
+          setBacking(null);
+        }
+      }
+    })();
     return () => {
       cancelled = true;
     };
@@ -85,7 +94,7 @@ export default function RecordScreen() {
     router.replace({ pathname: "/takes/[id]", params: { id, number } });
   };
 
-  if (!backing) {
+  if (!backing || !ready) {
     return (
       <View style={{ flex: 1, padding: 16 }}>
         <Text>{message}</Text>
