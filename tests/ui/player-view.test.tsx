@@ -51,4 +51,13 @@ describe("PlayerView", () => {
     );
     expect(screen.getByText("boom")).toBeTruthy();
   });
+
+  it("triggers recording from the Record button", async () => {
+    const onRecord = jest.fn();
+    await render(
+      <PlayerView title="G1" singer="S1" lines={lines} controller={stubController()} onRecord={onRecord} />,
+    );
+    await fireEvent.press(screen.getByText("Record"));
+    expect(onRecord).toHaveBeenCalled();
+  });
 });

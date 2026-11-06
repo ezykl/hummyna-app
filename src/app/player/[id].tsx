@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
@@ -97,6 +97,8 @@ export default function PlayerScreen() {
 function PlayerScreenInner({ engine, title, singer, lines, midi }: Loaded) {
   const controller = usePlayer(engine);
   const { load } = controller;
+  const router = useRouter();
+  const { id, number } = useLocalSearchParams<{ id: string; number: string }>();
   useKeepAwake();
 
   // Boot the synth and load the song once the WebView host has mounted
@@ -111,7 +113,13 @@ function PlayerScreenInner({ engine, title, singer, lines, midi }: Loaded) {
 
   return (
     <View style={{ flex: 1 }}>
-      <PlayerView title={title} singer={singer} lines={lines} controller={controller} />
+      <PlayerView
+        title={title}
+        singer={singer}
+        lines={lines}
+        controller={controller}
+        onRecord={() => router.push({ pathname: "/record/[id]", params: { id, number } })}
+      />
       <View style={{ height: 1 }}>
         <SynthHost engine={engine} />
       </View>
