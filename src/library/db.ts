@@ -2,6 +2,8 @@ import * as SQLite from "expo-sqlite";
 import type { SQLiteBindParams } from "expo-sqlite";
 import type { LibraryStore, SqlValue, SqliteAdapter } from "./store";
 import { createLibraryStore, migrate } from "./store";
+import { createTakesStore, migrateTakes } from "./takes";
+import type { TakesStore } from "./takes";
 
 export * from "./store";
 
@@ -21,20 +23,30 @@ export function expoSqliteAdapter(db: SQLite.SQLiteDatabase): SqliteAdapter {
   };
 }
 
-let cached: Promise<LibraryStore> | undefined;
+let cachedAdapter: Promise<SqliteAdapter> | undefined;
 
-/** Opens (once) and migrates the library database, returning a shared store. */
-export function openLibraryDb(name = "hummyna.db"): Promise<LibraryStore> {
-  if (!cached) {
-    cached = (async () => {
+function openAdapter(name: string): Promise<SqliteAdapter> {
+  if (!cachedAdapter) {
+    cachedAdapter = (async () => {
       const db = SQLite.openDatabaseSync(name);
       const adapter = expoSqliteAdapter(db);
       await migrate(adapter);
-      return createLibraryStore(adapter);
+      await migrateTakes(adapter);
+      return adapter;
     })().catch((err) => {
-      cached = undefined; // a transient open/migrate failure must not poison future calls
+      cachedAdapter = undefined; // a transient open/migrate failure must not poison future calls
       throw err;
     });
   }
-  return cached;
+  return cachedAdapter;
+}
+
+/** Opens (once) and migrates the library database, returning a shared store. */
+export async function openLibraryDb(name = "hummyna.db"): Promise<LibraryStore> {
+  return createLibraryStore(await openAdapter(name));
+}
+
+/** Opens (once) and migrates the database, returning a shared takes store. */
+export async function openTakesStore(name = "hummyna.db"): Promise<TakesStore> {
+  return createTakesStore(await openAdapter(name));
 }

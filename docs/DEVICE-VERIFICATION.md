@@ -91,6 +91,20 @@ $env:HUMMYNA_SOUNDFONT = 'file:///path/to/gm.sf2'   # app.config.js -> expo.extr
       autoplay after the Play tap (`mediaPlaybackRequiresUserAction={false}`).
 - [ ] No memory blow-up on a multi-minute MIDI; progress ticks smoothly.
 
+## P2.3 — Recording
+
+- [ ] First tap of **Record** prompts for microphone permission; granting it
+      proceeds (denying shows an error and does not start capture).
+- [ ] From a song, tap **Record** → the backing track plays **and** voice capture
+      starts (sing-along).
+- [ ] The input meter moves with the voice; the elapsed timer advances.
+- [ ] Tap **Stop** → a take is saved and the takes screen lists it.
+- [ ] With the mic permission denied, the recorder surfaces a permission error
+      (`HumMyna: microphone permission denied`) and does **not** crash.
+- [ ] iOS: recording **while** the synth plays requires a recording-capable audio
+      session; verify both the backing track and the mic are captured (the iOS
+      session caveat — playback may duck or route to the receiver).
+
 ## Reporting
 
 When a check fails, capture: platform + OS version, app build, the exact steps,
