@@ -68,4 +68,27 @@ describe("useRecorder", () => {
     expect(result.current.status).toBe("error");
     expect(result.current.error).toMatch(/mic denied/);
   });
+
+  it("returns false on permission failure and errors when stop fails", async () => {
+    const rec = new FakeMicRecorder();
+    rec.failPrepare = new Error("mic denied");
+    const { result } = await renderHook(() => useRecorder(rec));
+    let ok = true;
+    await act(async () => {
+      ok = await result.current.start();
+    });
+    expect(ok).toBe(false);
+    // fresh recorder that records, then a failing stop
+    const rec2 = new FakeMicRecorder();
+    const h = await renderHook(() => useRecorder(rec2));
+    await act(async () => {
+      await h.result.current.start();
+    });
+    rec2.failStop = new Error("finalize failed");
+    await act(async () => {
+      await h.result.current.stop();
+    });
+    expect(h.result.current.status).toBe("error");
+    expect(h.result.current.error).toMatch(/finalize failed/);
+  });
 });

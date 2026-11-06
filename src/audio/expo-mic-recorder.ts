@@ -21,7 +21,7 @@ export function useExpoMicRecorder(): MicRecorder {
 
   const onBuffer = useCallback((buffer: StreamBuffer) => {
     lastSampleRate.current = buffer.sampleRate;
-    const pcm = new Float32Array(buffer.data);
+    const pcm = new Float32Array(buffer.data.slice(0));
     for (const listener of listeners.current) listener(pcm, buffer.sampleRate);
   }, []);
 
@@ -66,11 +66,7 @@ export function useExpoMicRecorder(): MicRecorder {
           };
         } catch {
           stream.stop();
-          return {
-            uri: "",
-            durationMs: Date.now() - startedAt.current,
-            sampleRate: lastSampleRate.current,
-          };
+          throw new Error("HumMyna: recording failed");
         }
       },
 

@@ -26,26 +26,30 @@ export default function RecordScreen() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const loaded = await loadSong(libraryId, songNumber).catch(() => null);
-      if (!active) return;
-      if (!loaded) {
-        setMessage("Couldn't open this song.");
-        return;
-      }
-      let sf2: Uint8Array;
       try {
-        sf2 = await soundFontBytes();
+        const loaded = await loadSong(libraryId, songNumber).catch(() => null);
+        if (!active) return;
+        if (!loaded) {
+          setMessage("Couldn't open this song.");
+          return;
+        }
+        let sf2: Uint8Array;
+        try {
+          sf2 = await soundFontBytes();
+        } catch (err) {
+          if (active) setMessage(err instanceof Error ? err.message : "No SoundFont configured.");
+          return;
+        }
+        const { libraryJs, processorJs } = await loadSynthSources();
+        if (!active) return;
+        const engine = new WebViewSynthEngine({ libraryJs, processorJs, sf2 });
+        setTitle(loaded.ref.title);
+        setSinger(loaded.ref.singer);
+        setBacking(engine);
+        setMidi(loaded.midi);
       } catch (err) {
-        if (active) setMessage(err instanceof Error ? err.message : "No SoundFont configured.");
-        return;
+        if (active) setMessage(err instanceof Error ? err.message : "Couldn't open this song.");
       }
-      const { libraryJs, processorJs } = await loadSynthSources();
-      if (!active) return;
-      const engine = new WebViewSynthEngine({ libraryJs, processorJs, sf2 });
-      setTitle(loaded.ref.title);
-      setSinger(loaded.ref.singer);
-      setBacking(engine);
-      setMidi(loaded.midi);
     })();
     return () => {
       active = false;
@@ -66,9 +70,10 @@ export default function RecordScreen() {
 
   useEffect(() => () => backing?.dispose(), [backing]);
 
-  const onStart = () => {
-    void controller.start();
-    backing?.play();
+  const onStart = async () => {
+    const started = await controller.start();
+    if (started) backing?.play();
+    else backing?.stop();
   };
 
   const onStop = async () => {
@@ -80,7 +85,7 @@ export default function RecordScreen() {
     router.replace({ pathname: "/takes/[id]", params: { id, number } });
   };
 
-  if (!backing && message !== "Loading...") {
+  if (!backing) {
     return (
       <View style={{ flex: 1, padding: 16 }}>
         <Text>{message}</Text>
@@ -96,7 +101,7 @@ export default function RecordScreen() {
         elapsedSec={controller.elapsedSec}
         level={controller.level}
         error={controller.error}
-        onStart={onStart}
+        onStart={() => void onStart()}
         onStop={() => void onStop()}
       />
       {backing ? (

@@ -6,6 +6,7 @@ export class FakeMicRecorder implements MicRecorder {
   stopped = 0;
   disposed = 0;
   failPrepare: Error | null = null;
+  failStop: Error | null = null;
   take: Take = { uri: "file:///take.wav", durationMs: 1234, sampleRate: 44100 };
   private listeners = new Set<FrameListener>();
 
@@ -26,6 +27,7 @@ export class FakeMicRecorder implements MicRecorder {
   }
   async stop(): Promise<Take> {
     this.stopped += 1;
+    if (this.failStop) throw this.failStop;
     return this.take;
   }
   emit(pcm: Float32Array, sampleRate = 44100): void {

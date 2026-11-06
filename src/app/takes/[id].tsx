@@ -12,6 +12,7 @@ export default function TakesScreen() {
   const libraryId = Number(id);
   const songNumber = Number(number);
   const [takes, setTakes] = useState<TakeRecord[]>([]);
+  const [playingPath, setPlayingPath] = useState<string | null>(null);
   const player = useAudioPlayer();
 
   const refresh = useCallback(async () => {
@@ -27,11 +28,15 @@ export default function TakesScreen() {
 
   const onPlay = (take: TakeRecord) => {
     player.replace(take.path);
-    void player.seekTo(0);
     player.play();
+    setPlayingPath(take.path);
   };
 
   const onDelete = async (take: TakeRecord) => {
+    if (take.path === playingPath) {
+      player.pause();
+      setPlayingPath(null);
+    }
     const store = await openTakesStore();
     await store.deleteTake(take.id);
     try {

@@ -8,7 +8,7 @@ export interface RecorderController {
   elapsedSec: number;
   level: number; // 0..1
   error: string | null;
-  start(): Promise<void>;
+  start(): Promise<boolean>;
   stop(): Promise<Take | null>;
   dispose(): void;
 }
@@ -44,11 +44,13 @@ export function useRecorder(recorder: MicRecorder, opts: { now?: () => number } 
       });
       recorder.start();
       setStatus("recording");
+      return true;
     } catch (err) {
       unsubscribe.current?.();
       unsubscribe.current = null;
       setError(err instanceof Error ? err.message : String(err));
       setStatus("error");
+      return false;
     }
   }, [recorder, now]);
 
