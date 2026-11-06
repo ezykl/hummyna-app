@@ -21,6 +21,7 @@ export default function RecordScreen() {
   const [message, setMessage] = useState("Loading...");
   const [title, setTitle] = useState("");
   const [singer, setSinger] = useState("");
+  const [midi, setMidi] = useState<Uint8Array | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -39,18 +40,29 @@ export default function RecordScreen() {
         return;
       }
       const { libraryJs, processorJs } = await loadSynthSources();
-      const engine = new WebViewSynthEngine({ libraryJs, processorJs, sf2 });
-      await engine.init().catch(() => {});
-      await engine.load(loaded.midi).catch(() => {});
       if (!active) return;
+      const engine = new WebViewSynthEngine({ libraryJs, processorJs, sf2 });
       setTitle(loaded.ref.title);
       setSinger(loaded.ref.singer);
       setBacking(engine);
+      setMidi(loaded.midi);
     })();
     return () => {
       active = false;
     };
   }, [libraryId, songNumber]);
+
+  useEffect(() => {
+    if (!backing || !midi) return;
+    let cancelled = false;
+    void backing
+      .init()
+      .then(() => (cancelled ? undefined : backing.load(midi)))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [backing, midi]);
 
   useEffect(() => () => backing?.dispose(), [backing]);
 
