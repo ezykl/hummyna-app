@@ -98,12 +98,21 @@ $env:HUMMYNA_SOUNDFONT = 'file:///path/to/gm.sf2'   # app.config.js -> expo.extr
 - [ ] From a song, tap **Record** → the backing track plays **and** voice capture
       starts (sing-along).
 - [ ] The input meter moves with the voice; the elapsed timer advances.
-- [ ] Tap **Stop** → a take is saved and the takes screen lists it.
+- [ ] Tap **Stop** → a take is saved and the **results** screen appears (takes remain reachable from the player's **Takes** button).
 - [ ] With the mic permission denied, the recorder surfaces a permission error
       (`HumMyna: microphone permission denied`) and does **not** crash.
 - [ ] iOS: recording **while** the synth plays requires a recording-capable audio
       session; verify both the backing track and the mic are captured (the iOS
       session caveat — playback may duck or route to the receiver).
+
+## P2.4 — Scoring
+
+- [ ] Sing a take (**Record** → **Stop**) → the **results** screen appears (not the takes list).
+- [ ] The results screen shows the accuracy **%**, a letter **grade**, the
+      **notes / best-streak** line, and **per-line bars**.
+- [ ] **Sing again** returns to the player for the same song.
+- [ ] Tapping **Fun** on the player shows the results screen with the
+      **"Fun mode — not mic-based."** label (random score, no mic input used).
 
 ## Reporting
 

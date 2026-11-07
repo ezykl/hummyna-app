@@ -3,13 +3,15 @@ import { useKeepAwake } from "expo-keep-awake";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import type { LyricLine } from "@hummyna/hmp";
-import { openHmp, parseLyrics } from "@hummyna/hmp";
+import { extractMelody, openHmp, parseLyrics } from "@hummyna/hmp";
 import { soundFontBytes } from "../../audio/sf2";
 import { loadSynthSources } from "../../audio/synth-assets";
 import { usePlayer } from "../../audio/use-player";
 import { SynthHost, WebViewSynthEngine } from "../../audio/webview-synth-engine";
 import { openLibraryDb } from "../../library/db";
 import { libraryKeys } from "../../library/keys";
+import { randomScore } from "../../score/fun";
+import { setLastResult } from "../../score/results-store";
 import { fileByteSource } from "../../platform/file-byte-source";
 import { rnCryptoAdapter } from "../../platform/rn-crypto";
 import { rnInflateAdapter } from "../../platform/rn-inflate";
@@ -120,6 +122,11 @@ function PlayerScreenInner({ engine, title, singer, lines, midi }: Loaded) {
         controller={controller}
         onRecord={() => router.push({ pathname: "/record/[id]", params: { id, number } })}
         onTakes={() => router.push({ pathname: "/takes/[id]", params: { id, number } })}
+        onFunScore={() => {
+          const count = extractMelody(midi).length;
+          setLastResult(randomScore(count || 20, Date.now()), { funMode: true });
+          router.push({ pathname: "/results/[id]", params: { id, number } });
+        }}
       />
       <View style={{ height: 1 }}>
         <SynthHost engine={engine} />

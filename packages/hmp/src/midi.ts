@@ -5,15 +5,15 @@ const MTRK = [0x4d, 0x54, 0x72, 0x6b]; // "MTrk"
 
 const textDecoder = new TextDecoder();
 
-function readU32(b: Uint8Array, off: number): number {
+export function readU32(b: Uint8Array, off: number): number {
   return ((b[off] << 24) | (b[off + 1] << 16) | (b[off + 2] << 8) | b[off + 3]) >>> 0;
 }
 
-function readU16(b: Uint8Array, off: number): number {
+export function readU16(b: Uint8Array, off: number): number {
   return (b[off] << 8) | b[off + 1];
 }
 
-function matches(b: Uint8Array, off: number, sig: number[]): boolean {
+export function matches(b: Uint8Array, off: number, sig: number[]): boolean {
   for (let i = 0; i < 4; i++) if (b[off + i] !== sig[i]) return false;
   return true;
 }
@@ -42,12 +42,12 @@ export function probeStructure(bytes: Uint8Array): { ok: boolean; reason?: strin
   return { ok: true };
 }
 
-interface Vlq {
+export interface Vlq {
   pos: number;
   value: number;
 }
 
-function readVlq(b: Uint8Array, pos: number, to: number): Vlq | null {
+export function readVlq(b: Uint8Array, pos: number, to: number): Vlq | null {
   let value = 0;
   for (let count = 0; pos < to; count++) {
     const byte = b[pos++];

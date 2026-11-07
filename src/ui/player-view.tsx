@@ -12,6 +12,7 @@ export function PlayerView({
   controller,
   onRecord,
   onTakes,
+  onFunScore,
 }: {
   title: string;
   singer: string;
@@ -19,6 +20,7 @@ export function PlayerView({
   controller: PlayerController;
   onRecord?: () => void;
   onTakes?: () => void;
+  onFunScore?: () => void;
 }) {
   const { status, positionSec, durationSec, error } = controller;
   const fraction = durationSec > 0 ? Math.min(1, positionSec / durationSec) : 0;
@@ -53,6 +55,9 @@ export function PlayerView({
         </Pressable>
         <Pressable accessibilityRole="button" onPress={onTakes}>
           <Text style={styles.button}>Takes</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={onFunScore}>
+          <Text style={styles.button}>Fun</Text>
         </Pressable>
       </View>
       <LyricsView lines={lines} timeMs={positionSec * 1000} />
