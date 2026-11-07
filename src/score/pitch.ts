@@ -15,6 +15,7 @@ export function detectFrames(
   const hopMs = opts.hopMs ?? 40;
   const windowMs = opts.windowMs ?? 50;
   const minClarity = opts.minClarity ?? 0.9;
+  if (!(sampleRate > 0)) return [];
   const windowSize = Math.max(2, Math.round((windowMs / 1000) * sampleRate));
   const hopSize = Math.max(1, Math.round((hopMs / 1000) * sampleRate));
   if (pcm.length < windowSize) return [];

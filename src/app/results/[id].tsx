@@ -14,11 +14,18 @@ export default function ResultsScreen() {
       </View>
     );
   }
+  if (stored.result.noteCount === 0) {
+    return (
+      <View style={{ flex: 1, padding: 16 }}>
+        <Text>No reference melody for this song.</Text>
+      </View>
+    );
+  }
   return (
     <ResultsView
       result={stored.result}
       funMode={stored.funMode}
-      onSingAgain={() => router.replace({ pathname: "/player/[id]", params: { id, number } })}
+      onSingAgain={() => router.back()}
     />
   );
 }

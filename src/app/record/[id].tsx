@@ -28,6 +28,7 @@ export default function RecordScreen() {
   const [singer, setSinger] = useState("");
   const [midi, setMidi] = useState<Uint8Array | null>(null);
   const [ready, setReady] = useState(false);
+  const [scoring, setScoring] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -107,6 +108,8 @@ export default function RecordScreen() {
     if (!take || !take.uri) return;
     const takes = await openTakesStore();
     await takes.addTake({ libraryId, number: songNumber, path: take.uri, durationMs: take.durationMs });
+    setScoring(true);
+    await new Promise((resolve) => setTimeout(resolve, 50));
     const collector = collectorRef.current;
     if (collector && midi) {
       const reference = extractMelody(midi);
@@ -116,6 +119,13 @@ export default function RecordScreen() {
     router.replace({ pathname: "/results/[id]", params: { id, number } });
   };
 
+  if (scoring) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Scoring…</Text>
+      </View>
+    );
+  }
   if (!backing || !ready) {
     return (
       <View style={{ flex: 1, padding: 16 }}>
