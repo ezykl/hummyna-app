@@ -3,6 +3,7 @@ export * from "./types";
 export * from "./byte-source";
 export * from "./reader";
 export * from "./midi";
+export * from "./notes";
 export { webCryptoAdapter } from "./adapters/crypto";
 export type { CryptoAdapter } from "./adapters/crypto";
 export { webInflateAdapter } from "./adapters/inflate";
