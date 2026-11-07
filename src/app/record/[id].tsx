@@ -1,5 +1,6 @@
+import { extractMelody, parseLyrics } from "@hummyna/hmp";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { useExpoMicRecorder } from "../../audio/expo-mic-recorder";
 import { loadSong } from "../../audio/load-song";
@@ -8,6 +9,10 @@ import { loadSynthSources } from "../../audio/synth-assets";
 import { useRecorder } from "../../audio/use-recorder";
 import { SynthHost, WebViewSynthEngine } from "../../audio/webview-synth-engine";
 import { openTakesStore } from "../../library/db";
+import { FrameCollector } from "../../score/frames";
+import { detectFrames } from "../../score/pitch";
+import { setLastResult } from "../../score/results-store";
+import { scorePerformance } from "../../score/score";
 import { RecordView } from "../../ui/record-view";
 
 export default function RecordScreen() {
@@ -79,7 +84,18 @@ export default function RecordScreen() {
 
   useEffect(() => () => backing?.dispose(), [backing]);
 
+  const collectorRef = useRef<FrameCollector | null>(null);
+  useEffect(
+    () =>
+      recorder.frames((pcm, sampleRate) => {
+        if (!collectorRef.current) collectorRef.current = new FrameCollector(sampleRate);
+        collectorRef.current.push(pcm);
+      }),
+    [recorder],
+  );
+
   const onStart = async () => {
+    collectorRef.current = null;
     const started = await controller.start();
     if (started) backing?.play();
     else backing?.stop();
@@ -91,7 +107,13 @@ export default function RecordScreen() {
     if (!take || !take.uri) return;
     const takes = await openTakesStore();
     await takes.addTake({ libraryId, number: songNumber, path: take.uri, durationMs: take.durationMs });
-    router.replace({ pathname: "/takes/[id]", params: { id, number } });
+    const collector = collectorRef.current;
+    if (collector && midi) {
+      const reference = extractMelody(midi);
+      const detected = detectFrames(collector.frames(), collector.sampleRate);
+      setLastResult(scorePerformance(reference, detected, { lines: parseLyrics(midi) }));
+    }
+    router.replace({ pathname: "/results/[id]", params: { id, number } });
   };
 
   if (!backing || !ready) {

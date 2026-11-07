@@ -69,4 +69,13 @@ describe("PlayerView", () => {
     await fireEvent.press(screen.getByText("Takes"));
     expect(onTakes).toHaveBeenCalled();
   });
+
+  it("triggers the fun score", async () => {
+    const onFunScore = jest.fn();
+    await render(
+      <PlayerView title="G1" singer="S1" lines={lines} controller={stubController()} onFunScore={onFunScore} />,
+    );
+    await fireEvent.press(screen.getByText("Fun"));
+    expect(onFunScore).toHaveBeenCalled();
+  });
 });
