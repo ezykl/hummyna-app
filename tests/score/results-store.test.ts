@@ -7,4 +7,9 @@ describe("results store", () => {
     setLastResult(result, { funMode: true });
     expect(getLastResult()).toEqual({ result, funMode: true });
   });
+
+  it("defaults funMode to false", () => {
+    setLastResult(scorePerformance([], []));
+    expect(getLastResult()?.funMode).toBe(false);
+  });
 });

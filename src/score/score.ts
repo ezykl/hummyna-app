@@ -32,7 +32,7 @@ export interface ScoreOptions {
   lines?: LyricLine[];
 }
 
-function gradeFor(accuracy: number): string {
+export function gradeFor(accuracy: number): string {
   if (accuracy >= 0.9) return "S";
   if (accuracy >= 0.8) return "A";
   if (accuracy >= 0.65) return "B";
@@ -71,11 +71,11 @@ export function scorePerformance(
     let best: DetectedFrame | null = null;
     for (const f of detected) {
       if (f.timeMs < from || f.timeMs > to) continue;
-      if (f.midi !== note.midi) continue;
-      if (Math.abs(f.cents) > centTolerance) continue;
+      const centsOff = (f.midi - note.midi) * 100 + f.cents;
+      if (Math.abs(centsOff) > centTolerance) continue;
       if (!best || f.clarity > best.clarity) best = f;
     }
-    return { note, hit: best !== null, cents: best ? best.cents : 0 };
+    return { note, hit: best !== null, cents: best ? (best.midi - note.midi) * 100 + best.cents : 0 };
   });
 
   const hitCount = notes.filter((n) => n.hit).length;

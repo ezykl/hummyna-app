@@ -11,4 +11,9 @@ describe("randomScore", () => {
     expect(a.accuracy).toBeLessThanOrEqual(1);
     expect(["S", "A", "B", "C", "D"]).toContain(a.grade);
   });
+
+  it("differs across seeds and has empty lines", () => {
+    expect(randomScore(20, 1).accuracy).not.toBe(randomScore(20, 2).accuracy);
+    expect(randomScore(5, 7).lines).toEqual([]);
+  });
 });

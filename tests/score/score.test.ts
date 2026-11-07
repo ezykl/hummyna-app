@@ -48,6 +48,26 @@ describe("scorePerformance", () => {
     expect(r.lines.map((l) => l.accuracy)).toEqual([1, 1]);
   });
 
+  it("measures cents distance to the reference note", () => {
+    const ref = [note(0, 500, 60)];
+    const nearMid = { timeMs: 250, midi: 61, cents: -10, clarity: 1 }; // 90 cents above note 60
+    expect(scorePerformance(ref, [nearMid]).hitCount).toBe(0);
+    expect(scorePerformance(ref, [nearMid], { centTolerance: 100 }).hitCount).toBe(1);
+    const close = { timeMs: 250, midi: 61, cents: -95, clarity: 1 }; // 5 cents above note 60
+    expect(scorePerformance(ref, [close]).hitCount).toBe(1);
+  });
+
+  it("applies grade boundaries", () => {
+    const r = (hits: number, total: number) => {
+      const ref = Array.from({ length: total }, (_, i) => note(i * 500, i * 500 + 400, 60));
+      const det = Array.from({ length: hits }, (_, i) => ({ timeMs: i * 500 + 200, midi: 60, cents: 0, clarity: 1 }));
+      return scorePerformance(ref, det).grade;
+    };
+    expect(r(8, 10)).toBe("A"); // 0.8
+    expect(r(7, 10)).toBe("B"); // 0.7
+    expect(r(5, 10)).toBe("C"); // 0.5
+  });
+
   it("never divides by zero", () => {
     expect(scorePerformance([], []).accuracy).toBe(0);
     expect(scorePerformance([], []).lines).toEqual([]);

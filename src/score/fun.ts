@@ -1,12 +1,5 @@
+import { gradeFor } from "./score";
 import type { NoteScore, ScoreResult } from "./score";
-
-function gradeFor(accuracy: number): string {
-  if (accuracy >= 0.9) return "S";
-  if (accuracy >= 0.8) return "A";
-  if (accuracy >= 0.65) return "B";
-  if (accuracy >= 0.5) return "C";
-  return "D";
-}
 
 /** Deterministic random result for the opt-in, clearly-labelled fun mode. */
 export function randomScore(noteCount: number, seed: number): ScoreResult {
