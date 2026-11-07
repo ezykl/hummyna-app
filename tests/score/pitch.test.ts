@@ -12,7 +12,7 @@ describe("detectFrames", () => {
     const frames = detectFrames(sine(440, 44100, 400), 44100);
     expect(frames.length).toBeGreaterThan(0);
     expect(frames.every((f) => f.midi === 69)).toBe(true);
-    expect(Math.abs(frames[0].cents)).toBeLessThan(10);
+    expect(frames.every((f) => Math.abs(f.cents) < 10)).toBe(true);
   });
 
   it("detects A220 as MIDI 57", () => {
@@ -23,5 +23,11 @@ describe("detectFrames", () => {
 
   it("returns no frames for silence", () => {
     expect(detectFrames(new Float32Array(44100), 44100)).toEqual([]);
+  });
+
+  it("drops low-clarity frames", () => {
+    const noise = new Float32Array(44100);
+    for (let i = 0; i < noise.length; i++) noise[i] = ((i * 1103515245 + 12345) % 65536) / 32768 - 1;
+    expect(detectFrames(noise, 44100, { minClarity: 0.999 }).length).toBe(0);
   });
 });
