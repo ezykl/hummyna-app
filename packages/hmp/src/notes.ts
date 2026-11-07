@@ -129,20 +129,40 @@ function lyricTrackIndex(midi: Uint8Array): number {
 }
 
 function monophonise(notes: NoteEvent[]): ReferenceNote[] {
-  const sorted = [...notes].sort((a, b) => a.startMs - b.startMs || b.midi - a.midi);
-  const out: ReferenceNote[] = [];
-  for (const n of sorted) {
-    const prev = out[out.length - 1];
-    if (prev && n.startMs < prev.endMs) {
-      if (n.midi > prev.midi) {
-        prev.endMs = Math.max(prev.startMs, n.startMs);
-        out.push({ startMs: n.startMs, endMs: n.endMs, midi: n.midi });
-      }
-    } else {
-      out.push({ startMs: n.startMs, endMs: n.endMs, midi: n.midi });
+  if (notes.length === 0) return [];
+  const boundaries = Array.from(new Set(notes.flatMap((n) => [n.startMs, n.endMs]))).sort((a, b) => a - b);
+  const segments: ReferenceNote[] = [];
+  for (let i = 0; i < boundaries.length - 1; i += 1) {
+    const start = boundaries[i];
+    const end = boundaries[i + 1];
+    const mid = (start + end) / 2;
+    let best = Number.NEGATIVE_INFINITY;
+    for (const n of notes) {
+      if (n.startMs <= mid && mid < n.endMs && n.midi > best) best = n.midi;
+    }
+    if (best > Number.NEGATIVE_INFINITY) segments.push({ startMs: start, endMs: end, midi: best });
+  }
+  const merged: ReferenceNote[] = [];
+  for (const seg of segments) {
+    const prev = merged[merged.length - 1];
+    if (prev && prev.midi === seg.midi && prev.endMs === seg.startMs) prev.endMs = seg.endMs;
+    else merged.push({ ...seg });
+  }
+  return merged;
+}
+
+function busiestTrack(notes: NoteEvent[]): number {
+  const counts = new Map<number, number>();
+  for (const n of notes) counts.set(n.track, (counts.get(n.track) ?? 0) + 1);
+  let best = -1;
+  let bestCount = -1;
+  for (const [track, count] of counts) {
+    if (count > bestCount) {
+      bestCount = count;
+      best = track;
     }
   }
-  return out.filter((r) => r.endMs > r.startMs);
+  return best;
 }
 
 export function parseNotes(midi: Uint8Array): NoteEvent[] {
@@ -185,6 +205,6 @@ export function extractMelody(midi: Uint8Array): ReferenceNote[] {
   const notes = parseNotes(midi);
   if (notes.length === 0) return [];
   const lyric = lyricTrackIndex(midi);
-  const chosen = lyric >= 0 && notes.some((n) => n.track === lyric) ? notes.filter((n) => n.track === lyric) : notes;
-  return monophonise(chosen.length > 0 ? chosen : notes);
+  const track = lyric >= 0 && notes.some((n) => n.track === lyric) ? lyric : busiestTrack(notes);
+  return monophonise(notes.filter((n) => n.track === track));
 }

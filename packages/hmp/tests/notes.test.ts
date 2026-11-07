@@ -23,6 +23,48 @@ describe("parseNotes", () => {
   it("returns [] for non-midi", () => {
     expect(parseNotes(new Uint8Array([1, 2, 3]))).toEqual([]);
   });
+
+  it("handles running status between note events", () => {
+    const notes = parseNotes(
+      midiFromEvents([
+        0x00, 0x90, 0x45, 0x60,
+        0x00, 0x46, 0x60,
+        0x60, 0x80, 0x45, 0x40,
+        0x00, 0x80, 0x46, 0x40,
+        0x00, 0xff, 0x2f, 0x00,
+      ]),
+    );
+    expect(notes.map((n) => n.midi)).toEqual([69, 70]);
+  });
+
+  it("honours an explicit tempo change", () => {
+    const notes = parseNotes(
+      midiFromEvents([
+        0x00, 0xff, 0x51, 0x03, 0x03, 0xd0, 0x90,
+        0x00, 0x90, 0x45, 0x60,
+        0x60, 0x80, 0x45, 0x40,
+        0x00, 0xff, 0x2f, 0x00,
+      ]),
+    );
+    expect(notes[0]).toMatchObject({ midi: 69, startMs: 0, endMs: 250 });
+  });
+});
+
+describe("extractMelody polyphony", () => {
+  it("keeps sustained tails and picks the highest active pitch per interval", () => {
+    const ref = extractMelody(
+      midiFromEvents([
+        0x00, 0x90, 0x3c, 0x60,
+        0x30, 0x90, 0x46, 0x60,
+        0x30, 0x80, 0x46, 0x40,
+        0x60, 0x80, 0x3c, 0x40,
+        0x00, 0xff, 0x2f, 0x00,
+      ]),
+    );
+    expect(ref.map((r) => r.midi)).toEqual([60, 70, 60]);
+    expect(ref[0].endMs).toBe(250);
+    expect(ref[ref.length - 1].endMs).toBe(1000);
+  });
 });
 
 describe("extractMelody", () => {
