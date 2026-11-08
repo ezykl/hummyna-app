@@ -1,6 +1,6 @@
 import { Asset } from "expo-asset";
 import Constants from "expo-constants";
-import { File } from "expo-file-system";
+import { Directory, File, Paths } from "expo-file-system";
 
 export type SoundFontSource = { kind: "asset"; module: number } | { kind: "file"; uri: string };
 
@@ -37,7 +37,42 @@ const realLoaders: SoundFontLoaders = {
   },
 };
 
+export interface SoundFontDiscovery {
+  listDocuments(): Promise<{ name: string; uri: string }[]>;
+}
+
+/** First `.sf2`/`.sf3` (alphabetical) in the app Documents dir, or null. */
+export async function findSoundFontInDocuments(discovery: SoundFontDiscovery): Promise<SoundFontSource | null> {
+  const files = await discovery.listDocuments();
+  const candidates = files
+    .filter((f) => /\.(sf2|sf3)$/i.test(f.name))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return candidates.length > 0 ? { kind: "file", uri: candidates[0].uri } : null;
+}
+
+const realDiscovery: SoundFontDiscovery = {
+  async listDocuments() {
+    const dir = new Directory(Paths.document);
+    if (!dir.exists) return [];
+    return dir.list().map((entry) => ({ name: entry.name, uri: entry.uri }));
+  },
+};
+
+/** Configured source wins; else a Documents `.sf2`; else a friendly error. */
+export async function resolveSoundFontBytes(
+  configured: SoundFontSource | null,
+  discovery: SoundFontDiscovery,
+  loaders: SoundFontLoaders,
+): Promise<Uint8Array> {
+  if (configured) return resolveSoundFont(configured, loaders);
+  const candidate = await findSoundFontInDocuments(discovery);
+  if (candidate?.kind === "file") return loaders.readFile(candidate.uri);
+  throw new Error(
+    "HumMyna: no SoundFont configured (set expo.extra.soundFont or place an .sf2 in the app Documents folder)",
+  );
+}
+
 /** The single swap-in point for the operator's license-clear `.sf2`. */
 export function soundFontBytes(): Promise<Uint8Array> {
-  return resolveSoundFont(configuredSoundFont(), realLoaders);
+  return resolveSoundFontBytes(configuredSoundFont(), realDiscovery, realLoaders);
 }
