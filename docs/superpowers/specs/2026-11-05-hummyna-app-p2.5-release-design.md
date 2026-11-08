@@ -54,15 +54,18 @@ the Expo account); the repo ships the config + exact commands.
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "channel": "development"
+      "channel": "development",
+      "environment": "development"
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "environment": "preview",
       "android": { "buildType": "apk" }
     },
     "production": {
       "channel": "production",
+      "environment": "production",
       "android": { "buildType": "app-bundle" },
       "autoIncrement": true
     }
@@ -92,10 +95,14 @@ the Expo account); the repo ships the config + exact commands.
 ## 6. Library keys via EAS environment variable
 
 `app.config.js` already reads `process.env.HUMMYNA_LIBRARY_KEYS` and puts it in
-`expo.extra.hummynaLibraryKeys`. EAS Build injects env at build time:
-- Create an EAS **environment variable** (secret) `HUMMYNA_LIBRARY_KEYS` scoped to
-  the `preview` (and later `production`) environment, e.g.
-  `eas env:create --name HUMMYNA_LIBRARY_KEYS --value "$(...)" --environment preview --visibility secret`.
+`expo.extra.hummynaLibraryKeys`. EAS Build injects env at build time — a build
+profile must set `"environment"` (§4) for those variables to apply:
+- Create an EAS **environment variable** `HUMMYNA_LIBRARY_KEYS` for the `preview`
+  (and later `production`) environment:
+  `eas env:set --name HUMMYNA_LIBRARY_KEYS --value "<json>" --environment preview --visibility sensitive`.
+  Use `sensitive` (obfuscated in build logs, readable in the CLI): the value is
+  embedded in the app bundle, so it is not a true secret — the community key is
+  deliberately public (not DRM).
 - Nothing secret is committed; a build without it surfaces the app's existing
   "keys are not configured" error at import time (not at build time).
 
