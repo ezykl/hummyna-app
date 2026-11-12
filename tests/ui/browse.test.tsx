@@ -66,7 +66,14 @@ describe("LibrariesView", () => {
     await render(<LibrariesView libraries={[library]} onImport={onImport} />);
     expect(screen.getByText("Pop")).toBeTruthy();
     expect(screen.getByText("3 songs")).toBeTruthy();
-    fireEvent.press(screen.getByText("Import library"));
+    await fireEvent.press(screen.getByText("Import library"));
     expect(onImport).toHaveBeenCalled();
+  });
+
+  it("opens settings", async () => {
+    const onSettings = jest.fn();
+    await render(<LibrariesView libraries={[library]} onImport={jest.fn()} onSettings={onSettings} />);
+    await fireEvent.press(screen.getByText("Settings"));
+    expect(onSettings).toHaveBeenCalled();
   });
 });

@@ -30,16 +30,10 @@ Install the APK from the printed link, then work through
 - **iOS:** drop it into the app's Documents folder via the **Files** app (the app
   is visible there), and the app discovers it at runtime.
 - **Android:** the app's Documents dir (`Paths.document`) is **app-private** and
-  not reachable from a file manager or `adb push` (for a non-debuggable APK). So on
-  Android either:
-  - set `HUMMYNA_SOUNDFONT` to a device `file://` URI at build time (dev/preview
-    builds), or
-  - for a **debug/development** build, `adb push gm.sf2` then
-    `adb shell run-as app.hummyna cp .../gm.sf2 files/gm.sf2`.
-
-  An in-app "Select SoundFont" import (via `File.pickFileAsync()` → copy into
-  Documents) is a planned follow-up so Android operators can add one without build
-  access.
+  not reachable from a file manager or `adb push` (for a non-debuggable APK).
+  Use the in-app **Settings → Select SoundFont** picker, which copies the chosen
+  `.sf2`/`.sf3` into the app. (Alternatives: set `HUMMYNA_SOUNDFONT` to a device
+  `file://` URI at build time, or `adb push` + `run-as` on a debug build.)
 
 ## Development build (dev client, iterate with Metro)
 
