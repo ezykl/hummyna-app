@@ -24,9 +24,22 @@ npx eas build --profile preview --platform android
 ```
 
 Install the APK from the printed link, then work through
-`docs/DEVICE-VERIFICATION.md`. Drop a license-clear `gm.sf2` (or `.sf3`) into the
-app's Documents folder first (Files on iOS; the app dir on Android) so playback
-has a SoundFont — or set `expo.extra.soundFont` via `HUMMYNA_SOUNDFONT`.
+`docs/DEVICE-VERIFICATION.md`. Playback needs a license-clear SoundFont
+(`.sf2`/`.sf3`):
+
+- **iOS:** drop it into the app's Documents folder via the **Files** app (the app
+  is visible there), and the app discovers it at runtime.
+- **Android:** the app's Documents dir (`Paths.document`) is **app-private** and
+  not reachable from a file manager or `adb push` (for a non-debuggable APK). So on
+  Android either:
+  - set `HUMMYNA_SOUNDFONT` to a device `file://` URI at build time (dev/preview
+    builds), or
+  - for a **debug/development** build, `adb push gm.sf2` then
+    `adb shell run-as app.hummyna cp .../gm.sf2 files/gm.sf2`.
+
+  An in-app "Select SoundFont" import (via `File.pickFileAsync()` → copy into
+  Documents) is a planned follow-up so Android operators can add one without build
+  access.
 
 ## Development build (dev client, iterate with Metro)
 

@@ -22,9 +22,11 @@ Latest status: **P2.1–P2.5 — pending**
       ```
       `app.config.js` copies this into `expo.extra.hummynaLibraryKeys`.
       Without it, import shows **"Import failed — … library keys are not configured"**.
-- [ ] **SoundFont** — drop a license-clear `gm.sf2` (or `.sf3`) into the app's
-      Documents folder (Files on iOS / the app dir on Android); the app discovers it
-      at runtime. (Alternatively set `HUMMYNA_SOUNDFONT` to a device `file://` URI.)
+- [ ] **SoundFont** — a license-clear `gm.sf2` (or `.sf3`). **iOS:** drop it into
+      the app's Documents folder via the Files app (discovered at runtime).
+      **Android:** the Documents dir is app-private, so instead set
+      `HUMMYNA_SOUNDFONT` to a device `file://` URI at build time, or `adb push` +
+      `run-as` on a debug build (see `docs/RELEASE.md`).
 - [ ] At least one real `.hmp` file (a small library) on the device.
 - [ ] Baseline (optional but recommended): `npm test` + `npm run lint` green.
 

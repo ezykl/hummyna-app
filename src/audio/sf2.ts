@@ -54,7 +54,10 @@ const realDiscovery: SoundFontDiscovery = {
   async listDocuments() {
     const dir = new Directory(Paths.document);
     if (!dir.exists) return [];
-    return dir.list().map((entry) => ({ name: entry.name, uri: entry.uri }));
+    return dir
+      .list()
+      .filter((entry): entry is File => entry instanceof File)
+      .map((entry) => ({ name: entry.name, uri: entry.uri }));
   },
 };
 
