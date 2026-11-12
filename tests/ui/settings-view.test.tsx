@@ -16,10 +16,15 @@ describe("SettingsView", () => {
     expect(screen.queryByText("Clear")).toBeNull();
   });
 
-  it("fires Clear when a SoundFont is set", async () => {
+  it("fires Clear when the selection is clearable", async () => {
     const onClear = jest.fn();
-    await render(<SettingsView soundFontName="gm.sf2" onSelect={jest.fn()} onClear={onClear} />);
+    await render(<SettingsView soundFontName="selected.sf2" canClear onSelect={jest.fn()} onClear={onClear} />);
     await fireEvent.press(screen.getByText("Clear"));
     expect(onClear).toHaveBeenCalled();
+  });
+
+  it("hides Clear for a non-imported SoundFont", async () => {
+    await render(<SettingsView soundFontName="gm.sf2" onSelect={jest.fn()} onClear={jest.fn()} />);
+    expect(screen.queryByText("Clear")).toBeNull();
   });
 });

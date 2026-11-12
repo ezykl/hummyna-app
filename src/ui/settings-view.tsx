@@ -2,10 +2,12 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export function SettingsView({
   soundFontName,
+  canClear = false,
   onSelect,
   onClear,
 }: {
   soundFontName: string | null;
+  canClear?: boolean;
   onSelect: () => void;
   onClear: () => void;
 }) {
@@ -16,7 +18,7 @@ export function SettingsView({
       <Pressable style={styles.button} onPress={onSelect} accessibilityRole="button">
         <Text style={styles.buttonText}>Select SoundFont</Text>
       </Pressable>
-      {soundFontName ? (
+      {canClear ? (
         <Pressable onPress={onClear} accessibilityRole="button">
           <Text style={styles.clear}>Clear</Text>
         </Pressable>

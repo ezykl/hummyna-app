@@ -106,10 +106,23 @@ export async function importSoundFont(): Promise<SoundFontSource | null> {
   return { kind: "file", uri: destination.uri };
 }
 
-/** The name of the SoundFont playback will use (selected, else first), or null. */
-export async function describeSoundFont(): Promise<{ name: string | null }> {
+function safeBaseName(uri: string): string {
+  const raw = uri.split("/").pop() ?? "";
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+/** What playback will use — the build-configured source or a Documents file. */
+export async function describeSoundFont(): Promise<{ name: string | null; canClear: boolean }> {
+  const configured = configuredSoundFont();
+  if (configured) {
+    return { name: configured.kind === "file" ? safeBaseName(configured.uri) : "bundled", canClear: false };
+  }
   const discovered = await findSoundFontInDocuments(realDiscovery);
-  if (!discovered || discovered.kind !== "file") return { name: null };
-  const base = decodeURIComponent(discovered.uri.split("/").pop() ?? "");
-  return { name: base.length > 0 ? base : null };
+  if (!discovered || discovered.kind !== "file") return { name: null, canClear: false };
+  const name = safeBaseName(discovered.uri);
+  return { name: name.length > 0 ? name : null, canClear: SELECTED_RE.test(name) };
 }

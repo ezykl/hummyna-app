@@ -5,9 +5,12 @@ import { SettingsView } from "../ui/settings-view";
 
 export default function SettingsScreen() {
   const [name, setName] = useState<string | null>(null);
+  const [canClear, setCanClear] = useState(false);
 
   const refresh = useCallback(async () => {
-    setName((await describeSoundFont()).name);
+    const info = await describeSoundFont();
+    setName(info.name);
+    setCanClear(info.canClear);
   }, []);
 
   useEffect(() => {
@@ -30,7 +33,12 @@ export default function SettingsScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <SettingsView soundFontName={name} onSelect={() => void onSelect()} onClear={() => void onClear()} />
+      <SettingsView
+        soundFontName={name}
+        canClear={canClear}
+        onSelect={() => void onSelect()}
+        onClear={() => void onClear()}
+      />
     </View>
   );
 }
