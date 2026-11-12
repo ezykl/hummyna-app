@@ -94,6 +94,7 @@ export default function LibrariesScreen() {
       summary={summary}
       onImport={onImport}
       onDelete={onDelete}
+      onSettings={() => router.push("/settings")}
       onOpen={(lib) => router.push({ pathname: "/library/[id]", params: { id: String(lib.id) } })}
     />
   );

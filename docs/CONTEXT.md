@@ -59,8 +59,8 @@ separate private repo.
    APK (`docs/RELEASE.md`), set `HUMMYNA_LIBRARY_KEYS`, and supply a license-clear
    `.sf2`.
 2. **Follow-ups (optional):** `npx expo install --fix` (align SDK patch versions),
-   app icons/splash, an in-app "Select SoundFont" picker (Android), the native
-   Android audio engine, store submission.
+   app icons/splash, the native Android audio engine, store submission.
+   (An in-app **Settings → Select SoundFont** picker now exists.)
 
 ## Open items / risks
 - **GM SoundFont (`.sf2`)** — operator provides a license-clear one; the app
@@ -74,7 +74,7 @@ separate private repo.
   accuracy. `npx expo install --check` reports SDK patch drifts — run `--fix`
   before a build.
 - **Parked tech debt:** FTS5 search, import dedupe, SAF grant persistence + nested
-  folders, search pagination, in-app SoundFont picker.
+  folders, search pagination.
 - App icons/splash are not set yet (defaults used).
 
 ## How to run / verify

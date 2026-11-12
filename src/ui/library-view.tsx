@@ -7,19 +7,26 @@ export function LibrariesView({
   onImport,
   onOpen,
   onDelete,
+  onSettings,
   summary,
 }: {
   libraries: Library[];
   onImport: () => void;
   onOpen?: (library: Library) => void;
   onDelete?: (library: Library) => void;
+  onSettings?: () => void;
   summary?: string;
 }) {
   return (
     <View style={styles.container}>
-      <Pressable style={styles.button} onPress={onImport} accessibilityRole="button">
-        <Text style={styles.buttonText}>Import library</Text>
-      </Pressable>
+      <View style={styles.actions}>
+        <Pressable style={[styles.button, styles.grow]} onPress={onImport} accessibilityRole="button">
+          <Text style={styles.buttonText}>Import library</Text>
+        </Pressable>
+        <Pressable style={styles.secondary} onPress={onSettings} accessibilityRole="button">
+          <Text style={styles.secondaryText}>Settings</Text>
+        </Pressable>
+      </View>
       {summary ? <Text style={styles.sub}>{summary}</Text> : null}
       <FlatList
         data={libraries}
@@ -91,7 +98,11 @@ export function LibraryDetailView({
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, gap: 12 },
   heading: { fontSize: 24, fontWeight: "700" },
+  actions: { flexDirection: "row", gap: 8, alignItems: "stretch" },
+  grow: { flex: 1 },
   button: { backgroundColor: "#2b6cb0", padding: 12, borderRadius: 8, alignItems: "center" },
+  secondary: { borderWidth: 1, borderColor: "#2b6cb0", paddingHorizontal: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  secondaryText: { color: "#2b6cb0", fontWeight: "600" },
   buttonText: { color: "white", fontWeight: "600" },
   input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 10 },
   row: { paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#ddd" },

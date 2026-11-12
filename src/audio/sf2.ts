@@ -41,12 +41,17 @@ export interface SoundFontDiscovery {
   listDocuments(): Promise<{ name: string; uri: string }[]>;
 }
 
-/** First `.sf2`/`.sf3` (alphabetical) in the app Documents dir, or null. */
+const SOUND_FONT_RE = /\.(sf2|sf3)$/i;
+const SELECTED_RE = /^selected\.(sf2|sf3)$/i;
+
+/** A user-selected SoundFont (copied into Documents), else the first `.sf2`/`.sf3`. */
 export async function findSoundFontInDocuments(discovery: SoundFontDiscovery): Promise<SoundFontSource | null> {
   const files = await discovery.listDocuments();
-  const candidates = files
-    .filter((f) => /\.(sf2|sf3)$/i.test(f.name))
+  const selected = files
+    .filter((f) => SELECTED_RE.test(f.name))
     .sort((a, b) => a.name.localeCompare(b.name));
+  if (selected.length > 0) return { kind: "file", uri: selected[0].uri };
+  const candidates = files.filter((f) => SOUND_FONT_RE.test(f.name)).sort((a, b) => a.name.localeCompare(b.name));
   return candidates.length > 0 ? { kind: "file", uri: candidates[0].uri } : null;
 }
 
@@ -78,4 +83,46 @@ export async function resolveSoundFontBytes(
 /** The single swap-in point for the operator's license-clear `.sf2`. */
 export function soundFontBytes(): Promise<Uint8Array> {
   return resolveSoundFontBytes(configuredSoundFont(), realDiscovery, realLoaders);
+}
+
+/** Removes any previously selected SoundFont from the app Documents dir. */
+export async function clearImportedSoundFont(): Promise<void> {
+  const dir = new Directory(Paths.document);
+  if (!dir.exists) return;
+  for (const entry of dir.list()) {
+    if (entry instanceof File && SELECTED_RE.test(entry.name)) entry.delete();
+  }
+}
+
+/** Lets the user pick an `.sf2`/`.sf3` and copies it into Documents as the selection. */
+export async function importSoundFont(): Promise<SoundFontSource | null> {
+  const picked = await File.pickFileAsync({ mimeTypes: "*/*" });
+  if (picked.canceled) return null;
+  const source = picked.result;
+  const extension = /\.sf3$/i.test(source.name) ? ".sf3" : ".sf2";
+  await clearImportedSoundFont();
+  const destination = new File(Paths.document, `selected${extension}`);
+  await source.copy(destination);
+  return { kind: "file", uri: destination.uri };
+}
+
+function safeBaseName(uri: string): string {
+  const raw = uri.split("/").pop() ?? "";
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+/** What playback will use — the build-configured source or a Documents file. */
+export async function describeSoundFont(): Promise<{ name: string | null; canClear: boolean }> {
+  const configured = configuredSoundFont();
+  if (configured) {
+    return { name: configured.kind === "file" ? safeBaseName(configured.uri) : "bundled", canClear: false };
+  }
+  const discovered = await findSoundFontInDocuments(realDiscovery);
+  if (!discovered || discovered.kind !== "file") return { name: null, canClear: false };
+  const name = safeBaseName(discovered.uri);
+  return { name: name.length > 0 ? name : null, canClear: SELECTED_RE.test(name) };
 }

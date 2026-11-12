@@ -40,6 +40,10 @@ describe("findSoundFontInDocuments", () => {
   it("returns null when none match", async () => {
     expect(await findSoundFontInDocuments(discovery(["a.txt", "b.mid"]))).toBeNull();
   });
+  it("prefers a user-selected file over others", async () => {
+    const found = await findSoundFontInDocuments(discovery(["aaa.sf2", "selected.sf3", "zzz.sf2"]));
+    expect(found).toEqual({ kind: "file", uri: "file:///doc/selected.sf3" });
+  });
 });
 
 describe("resolveSoundFontBytes", () => {
