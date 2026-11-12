@@ -4,21 +4,27 @@ Manual checks for behaviours that **cannot** be verified headlessly (jsdom/jest)
 Run on a real Android device first, then iOS. Re-run the relevant section after
 touching file-system, picker, SQLite, or crypto code.
 
-Latest status: **P2.1 — pending**
+Latest status: **P2.1–P2.5 — pending**
 
 ## Prerequisites
 
-- [ ] Dependencies installed: `npm install`
-- [ ] A dev build or Expo Go (P2.1 modules — `expo-file-system`, `expo-sqlite`,
-      `expo-router` — are Expo-Go compatible; later native audio needs a dev client).
+- [ ] **Install the internal build** — the recommended path is the `preview`
+      Android APK (`npx eas build --profile preview --platform android`); see
+      `docs/RELEASE.md`. For iterating, use the `development` dev-client build.
+      (A dev client is required — the app uses native modules: `expo-audio`
+      `AudioStream`, `react-native-webview`.)
 - [ ] **Library keys** available (the operator's `{ wrapPrivateJwk, signPublicJwk }`).
-      Inject at build/start time; never commit them:
+      Inject at build time via the EAS environment variable (see `docs/RELEASE.md`),
+      or locally:
       ```powershell
       $env:HUMMYNA_LIBRARY_KEYS = '{"wrapPrivateJwk":{...},"signPublicJwk":{...}}'
       npm run start
       ```
       `app.config.js` copies this into `expo.extra.hummynaLibraryKeys`.
       Without it, import shows **"Import failed — … library keys are not configured"**.
+- [ ] **SoundFont** — drop a license-clear `gm.sf2` (or `.sf3`) into the app's
+      Documents folder (Files on iOS / the app dir on Android); the app discovers it
+      at runtime. (Alternatively set `HUMMYNA_SOUNDFONT` to a device `file://` URI.)
 - [ ] At least one real `.hmp` file (a small library) on the device.
 - [ ] Baseline (optional but recommended): `npm test` + `npm run lint` green.
 
