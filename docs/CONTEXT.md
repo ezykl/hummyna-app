@@ -17,12 +17,13 @@ separate private repo.
 | Phase | Deliverable | Status |
 |---|---|---|
 | **P2.0** | Shared `.hmp` reader (`packages/hmp`) | ✅ done |
-| **P2.1** | App shell + import/browse (SAF/Files, SQLite, search) | ✅ done (device checks pending) |
-| P2.2 | Playback + synced lyrics (AudioEngine) | planned |
-| P2.3 | Recording (mic → take + PCM for scoring) | planned |
-| P2.4 | Scoring (pitch vs reference) + random fallback | planned |
-| P2.5 | Release (EAS Build → Android, then iOS) | planned |
-| later | Autotune / voice-FX | out of V1 |
+| **P2.1** | App shell + import/browse (SAF/Files, SQLite, search) | ✅ done |
+| **P2.2** | Playback + synced lyrics (WebView SpessaSynth `AudioEngine`) | ✅ done |
+| **P2.3** | Recording (mic → WAV take + live PCM, `expo-audio` `AudioStream`) | ✅ done |
+| **P2.4** | Scoring (pitch vs reference) + fun mode | ✅ done |
+| **P2.5** | Release tooling (EAS Build · internal Android APK · OTA) | ✅ done |
+| **device** | On-device verification of P2.1–P2.4 | ⏳ user-driven |
+| later | Autotune / voice-FX · native audio engine · store submission | out of V1 |
 
 ## Locked decisions
 - React Native + Expo (EAS); **Android first**, iOS next, one codebase.
@@ -35,43 +36,45 @@ separate private repo.
 - Reader is **random-access** over a `ByteSource` with `CryptoAdapter` /
   `InflateAdapter` seams (web/Node defaults; RN adapters swap in).
 
-## Current state — P2.1 complete (merged to `main` @ 86303dd)
-- **P2.0:** `packages/hmp` — constants, adapters (inflate/crypto), `ByteSource`,
-  random-access reader (verified vs golden `.hmp`), tamper suite, `parseLyrics`
-  (tempo map), public API.
-- **P2.1:** Expo app shell + import/browse.
-  - RN adapters: `src/platform/rn-crypto.ts` (`@peculiar/webcrypto`),
-    `src/platform/rn-inflate.ts` (`pako`, raw deflate).
-  - `src/platform/file-byte-source.ts` — `ByteSource` over SDK 58
-    `expo-file-system` `FileHandle` **random-access reads** (no native module
-    needed); `close()` releases the FD.
-  - `src/library/` — `store.ts` (pure SQLite logic + `SqliteAdapter` seam),
-    `db.ts` (expo-sqlite binding, memoized), `import.ts`, `keys.ts`,
-    `storage.ts`.
-  - `src/platform/pick-library.ts` — Android SAF / iOS Documents folder pickers.
-  - `src/ui/library-view.tsx` + routes in `src/app/` (`index.tsx`,
-    `library/[id].tsx`).
-  - CI: `.github/workflows/ci.yml` (Node 22 · `npm ci` · lint · test · scrub).
-  - **Green:** `npm test` = 31 vitest + 30 jest · `npm run lint` · `npm run scrub`.
+## Current state — P2.0–P2.5 complete (merged to `main`)
+- **P2.0:** `packages/hmp` — reader: adapters, `ByteSource`, random-access reader,
+  tamper suite, `parseLyrics` (tempo map), `parseNotes`/`extractMelody` (P2.4).
+- **P2.1:** Expo app shell + import/browse — RN crypto (`@peculiar/webcrypto`) /
+  inflate (`pako`) adapters; `file-byte-source.ts` (SDK 58 `FileHandle` ranged
+  reads); `src/library/` store/db/import/keys/storage; SAF/Documents pickers;
+  screens in `src/app/`; `.github/workflows/ci.yml`.
+- **P2.2:** WebView SpessaSynth `AudioEngine` (offline IIFE asset built by
+  `npm run build:synth`), lyrics timeline, player route; SF2 swap-in seam.
+- **P2.3:** `expo-audio` `AudioStream` `MicRecorder` (live PCM + WAV take), takes
+  store, record/takes routes.
+- **P2.4:** scoring — `FrameCollector`, `detectFrames` (`pitchy`),
+  `scorePerformance`, `randomScore` fun mode, results route.
+- **P2.5:** `eas.json` (dev/preview/production), `expo-updates` + fingerprint
+  `runtimeVersion`, runtime SoundFont discovery, `docs/RELEASE.md`.
+- **Green:** `npm test` = 38 vitest + 95 jest · `npm run lint` · `npm run scrub`.
+  (Line counts grow as phases land.)
 
 ## Next steps
-1. **Device-verify P2.1** — see `docs/DEVICE-VERIFICATION.md`. Needs the operator's
-   real key in `HUMMYNA_LIBRARY_KEYS` (else import can't decrypt).
-2. **P2.2 — Playback + synced lyrics (AudioEngine)** — the next sub-project.
-   Requires a license-clear GM **SoundFont (`.sf2`)** from the operator. New
-   creative work → run `brainstorming` → spec → plan before coding.
-3. Later phases: P2.3 recording · P2.4 scoring · P2.5 release (EAS Build).
+1. **Device-verify P2.1–P2.4** — `docs/DEVICE-VERIFICATION.md`. Build the `preview`
+   APK (`docs/RELEASE.md`), set `HUMMYNA_LIBRARY_KEYS`, and supply a license-clear
+   `.sf2`.
+2. **Follow-ups (optional):** `npx expo install --fix` (align SDK patch versions),
+   app icons/splash, an in-app "Select SoundFont" picker (Android), the native
+   Android audio engine, store submission.
 
 ## Open items / risks
-- **GM SoundFont (`.sf2`)** — operator provides a license-clear one before P2.2.
-- **Library keys** must be injected at build time via
-  `app.config.js` → `expo.extra.hummynaLibraryKeys` (env `HUMMYNA_LIBRARY_KEYS`);
-  no secret is committed. Import fails loudly if unset.
-- **Device-only unknowns:** SAF folder grant + `content://` ranged reads, iOS
-  Documents listing, and the **Hermes** crypto path (`@peculiar/webcrypto` is
-  proven only on Node/V8).
-- **Parked P2.1 tech debt:** FTS5 search (currently indexed `LIKE` columns),
-  import dedupe, SAF grant persistence + nested folders, search pagination.
+- **GM SoundFont (`.sf2`)** — operator provides a license-clear one; the app
+  discovers it in Documents or via `HUMMYNA_SOUNDFONT`. On Android, Documents is
+  app-private (needs build-time env or `adb`/`run-as`, or the planned picker).
+- **Library keys** injected at build time via `app.config.js`
+  (`HUMMYNA_LIBRARY_KEYS`, EAS env); no secret committed.
+- **Device-only unknowns:** SAF grant + `content://` ranged reads, iOS Documents,
+  the **Hermes** crypto path (`@peculiar/webcrypto`), WebView-synth audio,
+  `AudioStream` capture while the synth plays (iOS session), and real singing
+  accuracy. `npx expo install --check` reports SDK patch drifts — run `--fix`
+  before a build.
+- **Parked tech debt:** FTS5 search, import dedupe, SAF grant persistence + nested
+  folders, search pagination, in-app SoundFont picker.
 - App icons/splash are not set yet (defaults used).
 
 ## How to run / verify
@@ -80,7 +83,9 @@ npm install          # workspace root
 npm test             # vitest (packages/hmp) + jest (app)
 npm run lint         # reader tsc + app tsc
 npm run scrub        # internal-marker guard (also runs in CI)
+npm run build:synth  # regenerate assets/synth/* (SpessaSynth bundle)
 npm run start        # expo start (device/emulator)
+npm run build        # see docs/RELEASE.md for EAS build/OTA
 ```
 
 ## How to continue
