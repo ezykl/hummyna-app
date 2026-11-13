@@ -73,8 +73,8 @@ separate private repo.
   `AudioStream` capture while the synth plays (iOS session), and real singing
   accuracy. `npx expo install --check` reports SDK patch drifts — run `--fix`
   before a build.
-- **Parked tech debt:** FTS5 search, import dedupe, SAF grant persistence + nested
-  folders, search pagination.
+- **Parked tech debt:** SAF grant persistence + nested folder scan.
+  (FTS5 search, import dedupe, and search pagination are done.)
 - App icons/splash are not set yet (defaults used).
 
 ## How to run / verify

@@ -48,6 +48,7 @@ export interface AddLibraryResult {
 export interface SearchOptions {
   libraryId?: number;
   limit?: number;
+  offset?: number;
 }
 
 export interface LibraryStore {
@@ -79,6 +80,19 @@ CREATE TABLE IF NOT EXISTS songs (
 CREATE INDEX IF NOT EXISTS idx_songs_library ON songs(library_id);
 CREATE INDEX IF NOT EXISTS idx_songs_title ON songs(title);
 CREATE INDEX IF NOT EXISTS idx_songs_singer ON songs(singer);
+CREATE VIRTUAL TABLE IF NOT EXISTS songs_fts USING fts5(title, singer, number_text);
+CREATE TRIGGER IF NOT EXISTS songs_ai AFTER INSERT ON songs BEGIN
+  INSERT INTO songs_fts(rowid, title, singer, number_text) VALUES (new.id, new.title, new.singer, CAST(new.number AS TEXT));
+END;
+CREATE TRIGGER IF NOT EXISTS songs_ad AFTER DELETE ON songs BEGIN
+  DELETE FROM songs_fts WHERE rowid = old.id;
+END;
+CREATE TRIGGER IF NOT EXISTS songs_au AFTER UPDATE ON songs BEGIN
+  UPDATE songs_fts SET title = new.title, singer = new.singer, number_text = CAST(new.number AS TEXT) WHERE rowid = new.id;
+END;
+INSERT INTO songs_fts(rowid, title, singer, number_text)
+  SELECT id, title, singer, CAST(number AS TEXT) FROM songs
+  WHERE id NOT IN (SELECT rowid FROM songs_fts);
 `;
 
 interface LibraryRow {
@@ -137,15 +151,30 @@ async function inTransaction<T>(adapter: SqliteAdapter, fn: () => Promise<T>): P
   }
 }
 
-/** Escapes SQL LIKE metacharacters so a query of `%`/`_` is treated literally. */
-function escapeLike(value: string): string {
-  return value.replace(/[\\%_]/g, (c) => `\\${c}`);
+/**
+ * Builds an FTS5 MATCH query: each whitespace token becomes a quoted prefix
+ * query (`"g2"*`). Returns null when the query has no searchable tokens (e.g.
+ * "%" or "_"), so the caller returns no rows without running FTS.
+ */
+function toFtsQuery(query: string): string | null {
+  const tokens = query
+    .split(/\s+/)
+    .map((token) => token.replace(/["*]/g, ""))
+    .filter((token) => /[a-z0-9]/i.test(token));
+  if (tokens.length === 0) return null;
+  return tokens.map((token) => `"${token}"*`).join(" ");
 }
 
 export function createLibraryStore(adapter: SqliteAdapter): LibraryStore {
   return {
     async addLibrary(meta: NewLibrary, songs: NewSong[]): Promise<AddLibraryResult> {
       return inTransaction(adapter, async () => {
+        // Re-importing the same file replaces its rows (no duplicates by path).
+        await adapter.run(
+          "DELETE FROM songs WHERE library_id IN (SELECT id FROM libraries WHERE path = ?)",
+          [meta.path],
+        );
+        await adapter.run("DELETE FROM libraries WHERE path = ?", [meta.path]);
         const { lastInsertRowid: libraryId } = await adapter.run(
           "INSERT INTO libraries (name, path, song_count, created_at) VALUES (?, ?, ?, ?)",
           [meta.name, meta.path, songs.length, Date.now()],
@@ -176,25 +205,38 @@ export function createLibraryStore(adapter: SqliteAdapter): LibraryStore {
     },
 
     async searchSongs(query: string, options: SearchOptions = {}): Promise<Song[]> {
-      const { libraryId, limit = 50 } = options;
-      const clauses: string[] = [];
-      const params: SqlValue[] = [];
+      const { libraryId, limit = 50, offset = 0 } = options;
       const q = query.trim();
-      if (q !== "") {
-        const like = `%${escapeLike(q)}%`;
-        clauses.push(
-          "(title LIKE ? ESCAPE '\\' OR singer LIKE ? ESCAPE '\\' OR CAST(number AS TEXT) LIKE ? ESCAPE '\\')",
+
+      if (q === "") {
+        const clauses: string[] = [];
+        const params: SqlValue[] = [];
+        if (libraryId !== undefined) {
+          clauses.push("library_id = ?");
+          params.push(libraryId);
+        }
+        const where = clauses.length > 0 ? ` WHERE ${clauses.join(" AND ")}` : "";
+        params.push(limit, offset);
+        const rows = await adapter.all<SongRow>(
+          `SELECT * FROM songs${where} ORDER BY title COLLATE NOCASE, id LIMIT ? OFFSET ?`,
+          params,
         );
-        params.push(like, like, like);
+        return rows.map(toSong);
       }
+
+      const match = toFtsQuery(q);
+      if (match === null) return [];
+
+      const clauses = ["songs_fts MATCH ?"];
+      const params: SqlValue[] = [match];
       if (libraryId !== undefined) {
-        clauses.push("library_id = ?");
+        clauses.push("s.library_id = ?");
         params.push(libraryId);
       }
-      const where = clauses.length > 0 ? ` WHERE ${clauses.join(" AND ")}` : "";
-      params.push(limit);
+      params.push(limit, offset);
       const rows = await adapter.all<SongRow>(
-        `SELECT * FROM songs${where} ORDER BY title COLLATE NOCASE LIMIT ?`,
+        `SELECT s.* FROM songs s JOIN songs_fts ON songs_fts.rowid = s.id WHERE ${clauses.join(" AND ")}` +
+          " ORDER BY s.title COLLATE NOCASE, s.id LIMIT ? OFFSET ?",
         params,
       );
       return rows.map(toSong);

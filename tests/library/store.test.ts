@@ -77,11 +77,39 @@ describe("library store", () => {
     expect(scoped[0].libraryId).toBe(a.libraryId);
   });
 
-  it("treats LIKE metacharacters literally", async () => {
+  it("returns nothing for a query with no searchable tokens", async () => {
     const store = await freshStore();
     await store.addLibrary({ name: "Pop", path: "p" }, songs);
     expect(await store.searchSongs("%")).toHaveLength(0);
-    expect(await store.searchSongs("G_")).toHaveLength(0);
+    expect(await store.searchSongs("zzz")).toHaveLength(0);
+  });
+
+  it("searches by song number via FTS", async () => {
+    const store = await freshStore();
+    await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    const hits = await store.searchSongs("2");
+    expect(hits).toHaveLength(1);
+    expect(hits[0].number).toBe(2);
+  });
+
+  it("paginates with a limit and offset", async () => {
+    const store = await freshStore();
+    await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    const page = await store.searchSongs("", { limit: 1, offset: 1 });
+    expect(page).toHaveLength(1);
+    expect(page[0].title).toBe("G2");
+    expect(await store.searchSongs("", { limit: 2, offset: 5 })).toHaveLength(0);
+  });
+
+  it("re-importing the same path replaces rather than duplicates", async () => {
+    const store = await freshStore();
+    const first = await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    const second = await store.addLibrary({ name: "Pop v2", path: "p" }, [songs[0]]);
+    const libs = await store.listLibraries();
+    expect(libs).toHaveLength(1);
+    expect(libs[0]).toMatchObject({ id: second.libraryId, name: "Pop v2", songCount: 1 });
+    expect(await store.searchSongs("")).toHaveLength(1);
+    expect(first.libraryId).not.toBe(second.libraryId);
   });
 
   it("deletes a library and its songs", async () => {
