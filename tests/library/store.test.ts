@@ -77,11 +77,54 @@ describe("library store", () => {
     expect(scoped[0].libraryId).toBe(a.libraryId);
   });
 
-  it("treats LIKE metacharacters literally", async () => {
+  it("returns nothing for a query with no searchable tokens", async () => {
     const store = await freshStore();
     await store.addLibrary({ name: "Pop", path: "p" }, songs);
     expect(await store.searchSongs("%")).toHaveLength(0);
-    expect(await store.searchSongs("G_")).toHaveLength(0);
+    expect(await store.searchSongs("zzz")).toHaveLength(0);
+  });
+
+  it("searches by song number via FTS", async () => {
+    const store = await freshStore();
+    await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    const hits = await store.searchSongs("2");
+    expect(hits).toHaveLength(1);
+    expect(hits[0].number).toBe(2);
+  });
+
+  it("paginates with a limit and offset", async () => {
+    const store = await freshStore();
+    await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    const page = await store.searchSongs("", { limit: 1, offset: 1 });
+    expect(page).toHaveLength(1);
+    expect(page[0].title).toBe("G2");
+    expect(await store.searchSongs("", { limit: 2, offset: 5 })).toHaveLength(0);
+    // FTS path also paginates.
+    expect((await store.searchSongs("G", { limit: 1, offset: 1 }))[0].title).toBe("G2");
+  });
+
+  it("searches non-Latin titles", async () => {
+    const store = await freshStore();
+    await store.addLibrary({ name: "CJK", path: "cjk" }, [
+      { number: 1, title: "夜曲", singer: "周杰伦", offset: 0, length: 1 },
+      { number: 2, title: "Dance", singer: "S2", offset: 0, length: 1 },
+    ]);
+    const hits = await store.searchSongs("夜");
+    expect(hits).toHaveLength(1);
+    expect(hits[0].title).toBe("夜曲");
+  });
+
+  it("re-importing the same path replaces songs but keeps the library id", async () => {
+    const store = await freshStore();
+    const first = await store.addLibrary({ name: "Pop", path: "p" }, songs);
+    const second = await store.addLibrary({ name: "Pop v2", path: "p" }, [songs[0]]);
+    const libs = await store.listLibraries();
+    expect(libs).toHaveLength(1);
+    expect(second.libraryId).toBe(first.libraryId);
+    expect(libs[0]).toMatchObject({ id: first.libraryId, name: "Pop v2", songCount: 1 });
+    // FTS reflects the replacement (G2 gone, G1 present).
+    expect(await store.searchSongs("G2")).toHaveLength(0);
+    expect(await store.searchSongs("G1")).toHaveLength(1);
   });
 
   it("deletes a library and its songs", async () => {
