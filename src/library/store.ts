@@ -160,7 +160,7 @@ function toFtsQuery(query: string): string | null {
   const tokens = query
     .split(/\s+/)
     .map((token) => token.replace(/["*]/g, ""))
-    .filter((token) => /[a-z0-9]/i.test(token));
+    .filter((token) => /[\p{L}\p{N}]/u.test(token));
   if (tokens.length === 0) return null;
   return tokens.map((token) => `"${token}"*`).join(" ");
 }
@@ -169,16 +169,27 @@ export function createLibraryStore(adapter: SqliteAdapter): LibraryStore {
   return {
     async addLibrary(meta: NewLibrary, songs: NewSong[]): Promise<AddLibraryResult> {
       return inTransaction(adapter, async () => {
-        // Re-importing the same file replaces its rows (no duplicates by path).
-        await adapter.run(
-          "DELETE FROM songs WHERE library_id IN (SELECT id FROM libraries WHERE path = ?)",
+        // Re-importing the same file replaces its songs but KEEPS the library id
+        // stable, so recorded takes (keyed by library id) stay reachable.
+        const existing = await adapter.all<{ id: number }>(
+          "SELECT id FROM libraries WHERE path = ? ORDER BY id LIMIT 1",
           [meta.path],
         );
-        await adapter.run("DELETE FROM libraries WHERE path = ?", [meta.path]);
-        const { lastInsertRowid: libraryId } = await adapter.run(
-          "INSERT INTO libraries (name, path, song_count, created_at) VALUES (?, ?, ?, ?)",
-          [meta.name, meta.path, songs.length, Date.now()],
-        );
+        let libraryId: number;
+        if (existing.length > 0) {
+          libraryId = existing[0].id;
+          await adapter.run("DELETE FROM songs WHERE library_id = ?", [libraryId]);
+          await adapter.run(
+            "UPDATE libraries SET name = ?, song_count = ?, created_at = ? WHERE id = ?",
+            [meta.name, songs.length, Date.now(), libraryId],
+          );
+        } else {
+          const inserted = await adapter.run(
+            "INSERT INTO libraries (name, path, song_count, created_at) VALUES (?, ?, ?, ?)",
+            [meta.name, meta.path, songs.length, Date.now()],
+          );
+          libraryId = inserted.lastInsertRowid;
+        }
         for (const s of songs) {
           await adapter.run(
             "INSERT INTO songs (library_id, number, title, singer, offset, length) VALUES (?, ?, ?, ?, ?, ?)",

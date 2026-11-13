@@ -46,8 +46,12 @@ Latest status: **P2.1–P2.5 — pending**
 
 ### Browse / search
 - [ ] Tap a library → its songs list (and **only** its songs).
-- [ ] Search by title, by number, and by singer returns the right rows.
-- [ ] A query of `%` or `_` returns nothing (metacharacters treated literally).
+- [ ] Search by title, by number, and by singer returns the right rows (FTS5 —
+      token-prefix match; the FTS index is populated by triggers).
+- [ ] A query of only symbols (e.g. `%`) returns nothing.
+- [ ] A non-Latin title/singer (e.g. `夜曲`) is found by its characters.
+- [ ] Re-importing the same `.hmp` file updates it in place (no duplicate
+      library) and any recorded takes for it remain listed.
 
 ### Storage + delete
 - [ ] The libraries screen shows a summary: `N libraries · M songs · X`.
@@ -73,8 +77,8 @@ Latest status: **P2.1–P2.5 — pending**
 - Android folder listing is **single-level** (nested `.hmp` are not scanned); the
   SAF grant is not persisted across restarts; no document-picker fallback when the
   grant is denied.
-- Search uses indexed `LIKE` columns, not FTS5.
-- Re-importing the same file inserts duplicate rows (no dedupe yet).
+- Search uses **FTS5** (token-prefix). FTS5 is enabled in `expo-sqlite` on
+  Android/iOS (`SQLITE_ENABLE_FTS5=1` by default); the **web** build may lack it.
 - File sizes for `content://` URIs may read as `0` (SAF).
 
 ## P2.2 — Playback (WebView synth)
