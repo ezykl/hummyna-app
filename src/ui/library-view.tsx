@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Library, LibraryStore, Song } from "../library/store";
 
 export function LibrariesView({
@@ -38,7 +38,19 @@ export function LibrariesView({
       <FlatList
         data={libraries}
         keyExtractor={(l) => String(l.id)}
-        ListEmptyComponent={<Text style={styles.empty}>No libraries yet. Import a folder of .hmp files.</Text>}
+        ListEmptyComponent={
+          <View style={styles.emptyCard}>
+            <Image
+              source={require("../../assets/images/mascot-empty.png")}
+              style={styles.emptyMascot}
+              accessibilityIgnoresInvertColors
+            />
+            <Text style={styles.emptyTitle}>No libraries yet</Text>
+            <Text style={styles.empty}>
+              Tap "Import library" and pick the folder that holds your .hmp files.
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <Pressable
             style={styles.row}
@@ -90,7 +102,16 @@ export function LibraryDetailView({
       <FlatList
         data={songs}
         keyExtractor={(s) => String(s.id)}
-        ListEmptyComponent={<Text style={styles.empty}>No matching songs.</Text>}
+        ListEmptyComponent={
+          <View style={styles.emptyCard}>
+            <Image
+              source={require("../../assets/images/mascot-search.png")}
+              style={styles.searchMascot}
+              accessibilityIgnoresInvertColors
+            />
+            <Text style={styles.emptyTitle}>No matching songs</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <Pressable style={styles.row} onPress={() => onOpenSong?.(item)}>
             <Text style={styles.title}>{item.title}</Text>
@@ -115,5 +136,9 @@ const styles = StyleSheet.create({
   row: { paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "#ddd" },
   title: { fontSize: 16, fontWeight: "600" },
   sub: { opacity: 0.6 },
-  empty: { opacity: 0.6, paddingVertical: 24, textAlign: "center" },
+  empty: { opacity: 0.6, textAlign: "center" },
+  emptyCard: { alignItems: "center", padding: 24, gap: 8 },
+  emptyMascot: { width: 120, height: 120 },
+  searchMascot: { width: 100, height: 100 },
+  emptyTitle: { fontSize: 18, fontWeight: "700" },
 });

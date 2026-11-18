@@ -6,6 +6,12 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2b6cb0"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.hummyna",
@@ -15,10 +21,15 @@
       }
     },
     "android": {
-      "package": "app.hummyna"
+      "package": "app.hummyna",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#2b6cb0"
+      }
     },
     "web": {
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
