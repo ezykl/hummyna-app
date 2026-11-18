@@ -45,9 +45,11 @@ export default function LibrariesScreen() {
   }, [refresh]);
 
   const importFiles = useCallback(
-    async (picked: PickedLibrary[]) => {
-      if (!store || picked.length === 0) return;
-      const keys = libraryKeys();
+    async (picked: PickedLibrary[], keys: ReturnType<typeof libraryKeys>) => {
+      if (!store || picked.length === 0) {
+        if (Platform.OS !== "android") Alert.alert("Import", "No .hmp files found.");
+        return;
+      }
       let imported = 0;
       let failed = 0;
       for (const file of picked) {
@@ -74,7 +76,7 @@ export default function LibrariesScreen() {
   const onImport = useCallback(async () => {
     try {
       libraryKeys(); // surface a missing key config before the picker opens
-      await importFiles(await pickHmpFiles());
+      await importFiles(await pickHmpFiles(), libraryKeys());
     } catch (err) {
       Alert.alert("Import failed", err instanceof Error ? err.message : String(err));
     }
@@ -82,7 +84,7 @@ export default function LibrariesScreen() {
 
   const onRescan = useCallback(async () => {
     try {
-      await importFiles(await rescanLibraryFolder());
+      await importFiles(await rescanLibraryFolder(), libraryKeys());
     } catch (err) {
       Alert.alert("Re-scan failed", err instanceof Error ? err.message : String(err));
     }

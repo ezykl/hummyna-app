@@ -117,6 +117,13 @@ export async function rescanLibraryFolder(): Promise<PickedLibrary[]> {
   if (Platform.OS !== "android") return [];
   const dirUri = await getPersistedLibraryFolder();
   if (!dirUri) return [];
+  try {
+    await safLister.listDirectory(dirUri);
+  } catch {
+    // The grant was revoked (or the folder moved) — forget it so the user can re-pick.
+    await clearPersistedLibraryFolder();
+    throw new Error("Saved folder access was revoked — pick the folder again.");
+  }
   return collectHmpUris(safLister, dirUri);
 }
 

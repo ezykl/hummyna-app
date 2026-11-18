@@ -48,6 +48,15 @@ describe("collectHmpUris", () => {
     expect(found).toHaveLength(0);
   });
 
+  it("scans one level deep by default", async () => {
+    const found = await collectHmpUris(
+      lister({ "dir:root": ["dir:root/sub"], "dir:root/sub": ["dir:root/sub/x.hmp"] }),
+      "dir:root",
+      1,
+    );
+    expect(found.map((f) => f.name)).toEqual(["x.hmp"]);
+  });
+
   it("survives cycles between folders", async () => {
     const found = await collectHmpUris(
       lister({ "dir:a": ["dir:a/b", "dir:a/one.hmp"], "dir:a/b": ["dir:a"] }),
