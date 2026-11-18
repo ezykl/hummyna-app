@@ -8,6 +8,7 @@ export function LibrariesView({
   onOpen,
   onDelete,
   onSettings,
+  onRescan,
   summary,
 }: {
   libraries: Library[];
@@ -15,6 +16,7 @@ export function LibrariesView({
   onOpen?: (library: Library) => void;
   onDelete?: (library: Library) => void;
   onSettings?: () => void;
+  onRescan?: () => void;
   summary?: string;
 }) {
   return (
@@ -23,6 +25,11 @@ export function LibrariesView({
         <Pressable style={[styles.button, styles.grow]} onPress={onImport} accessibilityRole="button">
           <Text style={styles.buttonText}>Import library</Text>
         </Pressable>
+        {onRescan ? (
+          <Pressable style={styles.secondary} onPress={onRescan} accessibilityRole="button">
+            <Text style={styles.secondaryText}>Re-scan</Text>
+          </Pressable>
+        ) : null}
         <Pressable style={styles.secondary} onPress={onSettings} accessibilityRole="button">
           <Text style={styles.secondaryText}>Settings</Text>
         </Pressable>
