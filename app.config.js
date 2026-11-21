@@ -18,8 +18,8 @@ if (sf2Uri) {
   extra.soundFont = { kind: "file", uri: sf2Uri };
 }
 
-// EAS project id (set by `eas init`, or via EXPO_PROJECT_ID). Enables OTA.
-const projectId = process.env.EXPO_PROJECT_ID;
+// EAS project id (written to app.json by `eas init`, or via EXPO_PROJECT_ID). Enables OTA.
+const projectId = process.env.EXPO_PROJECT_ID ?? extra.eas?.projectId;
 extra.eas = { ...(extra.eas ?? {}) };
 if (projectId) extra.eas.projectId = projectId;
 
