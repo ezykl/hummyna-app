@@ -22,6 +22,9 @@ separate private repo.
 | **P2.3** | Recording (mic → WAV take + live PCM, `expo-audio` `AudioStream`) | ✅ done |
 | **P2.4** | Scoring (pitch vs reference) + fun mode | ✅ done |
 | **P2.5** | Release tooling (EAS Build · internal Android APK · OTA) | ✅ done |
+| **P2.1+h** | Hardening: FTS5 search · import dedupe · pagination · SAF re-scan | ✅ done |
+| **brand** | Brand identity: Myna mascot, icons/splash, UI integration | ✅ done |
+| **deps** | Expo SDK 58 patch alignment (`expo install --fix` + jest-expo) | ✅ done |
 | **device** | On-device verification of P2.1–P2.4 | ⏳ user-driven |
 | later | Autotune / voice-FX · native audio engine · store submission | out of V1 |
 
@@ -51,31 +54,33 @@ separate private repo.
   `scorePerformance`, `randomScore` fun mode, results route.
 - **P2.5:** `eas.json` (dev/preview/production), `expo-updates` + fingerprint
   `runtimeVersion`, runtime SoundFont discovery, `docs/RELEASE.md`.
-- **Green:** `npm test` = 38 vitest + 95 jest · `npm run lint` · `npm run scrub`.
-  (Line counts grow as phases land.)
+- **Hardening:** FTS5 search (`songs_fts` + triggers), import dedupe (stable
+  library id), search pagination, persisted SAF folder + nested **Re-scan**.
+- **SoundFont UX:** in-app **Settings → Select SoundFont** (pick → copy into
+  Documents) with status/clear.
+- **Brand:** "Myna" mascot + icons/splash (`assets/images/`, built by
+  `npm run build:brand`), branded header, empty states, record/results mascots.
+- **Deps:** aligned to Expo SDK 58 recommended patch versions (`expo install
+  --check` clean).
+- **Green:** `npm test` = 38 vitest + 112 jest · `npm run lint` · `npm run scrub`.
 
 ## Next steps
 1. **Device-verify P2.1–P2.4** — `docs/DEVICE-VERIFICATION.md`. Build the `preview`
    APK (`docs/RELEASE.md`), set `HUMMYNA_LIBRARY_KEYS`, and supply a license-clear
-   `.sf2`.
-2. **Follow-ups (optional):** `npx expo install --fix` (align SDK patch versions),
-   app icons/splash, the native Android audio engine, store submission.
-   (An in-app **Settings → Select SoundFont** picker now exists.)
+   `.sf2` (Settings → Select SoundFont).
+2. **Later sub-projects (need a fresh spec each):** native Android audio engine
+   (TinySoundFont + Oboe), store submission (Play internal → release), autotune.
 
 ## Open items / risks
-- **GM SoundFont (`.sf2`)** — operator provides a license-clear one; the app
-  discovers it in Documents or via `HUMMYNA_SOUNDFONT`. On Android, Documents is
-  app-private (needs build-time env or `adb`/`run-as`, or the planned picker).
+- **GM SoundFont (`.sf2`)** — operator provides a license-clear one; pick it
+  in-app (Settings) or via `HUMMYNA_SOUNDFONT`/Documents.
 - **Library keys** injected at build time via `app.config.js`
   (`HUMMYNA_LIBRARY_KEYS`, EAS env); no secret committed.
 - **Device-only unknowns:** SAF grant + `content://` ranged reads, iOS Documents,
   the **Hermes** crypto path (`@peculiar/webcrypto`), WebView-synth audio,
-  `AudioStream` capture while the synth plays (iOS session), and real singing
-  accuracy. `npx expo install --check` reports SDK patch drifts — run `--fix`
-  before a build.
-- **Parked tech debt:** none — FTS5 search, import dedupe, pagination, and SAF
-  folder persistence + nested re-scan are done.
-- App icons/splash are not set yet (defaults used).
+  `AudioStream` capture while the synth plays (iOS session), FTS5 on device
+  (enabled by default in `expo-sqlite`), and real singing accuracy.
+- **Parked tech debt:** none.
 
 ## How to run / verify
 ```bash
@@ -84,8 +89,9 @@ npm test             # vitest (packages/hmp) + jest (app)
 npm run lint         # reader tsc + app tsc
 npm run scrub        # internal-marker guard (also runs in CI)
 npm run build:synth  # regenerate assets/synth/* (SpessaSynth bundle)
+npm run build:brand  # regenerate assets/images/* (mascot + icons)
 npm run start        # expo start (device/emulator)
-npm run build        # see docs/RELEASE.md for EAS build/OTA
+# EAS build/OTA: see docs/RELEASE.md
 ```
 
 ## How to continue
