@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import type { RecorderStatus } from "../audio/use-recorder";
 
 export function formatElapsed(sec: number): string {
@@ -37,6 +37,11 @@ export function RecordView({
           {error}
         </Text>
       ) : null}
+      <Image
+        source={require("../../assets/images/mascot-singing.png")}
+        style={styles.mascot}
+        accessibilityIgnoresInvertColors
+      />
       <View style={styles.meterTrack}>
         <View style={[styles.meterFill, { width: `${Math.round(Math.min(1, level) * 100)}%` }]} />
       </View>
@@ -59,6 +64,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: "700" },
   sub: { opacity: 0.7 },
   error: { color: "#b00020" },
+  mascot: { width: 140, height: 140 },
   meterTrack: { width: "80%", height: 10, borderRadius: 5, backgroundColor: "#e2e8f0", overflow: "hidden" },
   meterFill: { height: 10, backgroundColor: "#2f855a" },
   time: { fontSize: 28, fontVariant: ["tabular-nums"] },

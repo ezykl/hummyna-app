@@ -13,7 +13,8 @@
     "lint": "npm run lint --workspaces --if-present && tsc --noEmit",
     "test": "npm run test --workspaces --if-present && jest",
     "scrub": "node scripts/scrub.mjs",
-    "build:synth": "node scripts/build-synth-bundle.mjs"
+    "build:synth": "node scripts/build-synth-bundle.mjs",
+    "build:brand": "node scripts/build-brand-assets.mjs"
   },
   "dependencies": {
     "@hummyna/hmp": "*",
@@ -42,6 +43,7 @@
     "spessasynth_lib": "^4.4.2"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@testing-library/react-native": "^14.1.0",
     "@types/pako": "^2.0.4",
     "@types/react": "~19.3.0",

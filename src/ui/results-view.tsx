@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { ScoreResult } from "../score/score";
 
 export function ResultsView({
@@ -10,10 +10,23 @@ export function ResultsView({
   funMode?: boolean;
   onSingAgain: () => void;
 }) {
+  const celebrated = funMode || result.grade === "S" || result.grade === "A";
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {funMode ? <Text style={styles.fun}>Fun mode — not mic-based.</Text> : null}
+      <Image
+        source={
+          celebrated
+            ? require("../../assets/images/mascot-celebrate.png")
+            : require("../../assets/images/mascot-cheer.png")
+        }
+        style={styles.mascot}
+        accessibilityIgnoresInvertColors
+      />
       <Text style={styles.grade}>{result.grade}</Text>
+      {!celebrated ? (
+        <Text style={styles.cheer}>Great effort! Sing again to beat your score.</Text>
+      ) : null}
       <Text style={styles.percent}>{Math.round(result.accuracy * 100)}%</Text>
       <Text style={styles.sub}>
         {result.hitCount} / {result.noteCount} notes · best streak {result.bestStreak}
@@ -40,6 +53,8 @@ export function ResultsView({
 const styles = StyleSheet.create({
   container: { padding: 24, gap: 12, alignItems: "center" },
   fun: { color: "#b7791f", fontWeight: "700" },
+  mascot: { width: 140, height: 140 },
+  cheer: { opacity: 0.7, textAlign: "center" },
   grade: { fontSize: 72, fontWeight: "800" },
   percent: { fontSize: 28, fontWeight: "700" },
   sub: { opacity: 0.7 },
